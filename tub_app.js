@@ -52,13 +52,13 @@ function recalc(){
   var auroraGb= +document.getElementById('aurora-gb').value||0;
   var s3Gb    = +document.getElementById('s3-gb').value    ||0;
 
-  // 台北費率
+  // 東京費率 ap-northeast-1
   var cf    = Math.round(cfGb * 0.120);
   var alb   = Math.round(5.76 + albReq * 0.22);
-  var nat   = Math.round(0.045*720 + natGb*0.045);
-  var ec2   = Math.round(0.0464 * ec2Hr * 30 * 2);
-  var ebs   = Math.round(ebsGb * 0.08 * 2);
-  var aurora= Math.round(0.29*720 + auroraGb*0.10 + 15);
+  var nat   = Math.round(0.045*720 + natGb*0.045 + 14.22);
+  var ec2   = Math.round(0.0552 * ec2Hr * 30 * 2);
+  var ebs   = Math.round(ebsGb * 0.096 * 2);
+  var aurora= Math.round(0.3195*720*2 + auroraGb*0.10);
   var s3    = Math.round(s3Gb * 0.025);
 
   var wT=cf+alb+nat, aT=ec2+ebs, dT=aurora+s3, tot=wT+aT+dT;
