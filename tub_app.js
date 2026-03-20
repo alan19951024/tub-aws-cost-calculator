@@ -6,11 +6,11 @@ function revealTotal(){
   var btn=document.getElementById('reveal-btn');
   if(el.style.filter==='none'){
     el.style.filter='blur(10px)';
-    btn.textContent='👁 顯示金額';
+    btn.textContent='🔎 顯示金額';
     btn.classList.remove('revealed');
   } else {
     el.style.filter='none';
-    btn.textContent='🙈 隱藏金額';
+    btn.textContent='🔒 隱藏金額';
     btn.classList.add('revealed');
   }
 }
