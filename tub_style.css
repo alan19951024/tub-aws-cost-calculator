@@ -49,9 +49,8 @@ body::before {
 .page {
   position: relative;
   z-index: 1;
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 36px 28px 80px;
+  padding: 100px 120px 80px;
 }
 
 /* HEADER */
@@ -208,11 +207,15 @@ h1 span {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 .arch-wrap img {
-  width: 100%;
+  width: 75%;
   height: auto;
   display: block;
   border-radius: 8px;
   border: 1px solid var(--border2);
+  margin: 0 auto;
+}
+.arch-wrap img:hover {
+  transform: scale(1.02);
 }
 .arch-caption {
   margin-top: 14px;
@@ -222,6 +225,58 @@ h1 span {
   text-align: center;
   letter-spacing: 0.04em;
 }
+.arch-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 12px;
+}
+.arch-modal.open {
+  display: flex;
+}
+.arch-modal-content {
+  max-width: 95%;
+  max-height: 95%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.arch-modal-content img {
+  width: 100%;
+  max-height: calc(100vh - 100px);
+  object-fit: contain;
+  display:block;
+}
+.arch-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+.arch-modal-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #fff;
+  margin: 8px 0 12px;
+}
+
 
 /* CALC LAYOUT */
 .calc-layout {
@@ -632,10 +687,12 @@ h1 span {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
-  margin-bottom: 14px;
+  margin: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
+  BACKGROUND:aliceblue;
+  font-weight: 800;
 }
 .sec-title::after {
   content: "";
@@ -840,9 +897,9 @@ h1 span {
   gap: 10px;
 }
 .sc-svc-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
   align-items: center;
-  justify-content: space-between;
   padding: 9px 14px;
   background: var(--surface2);
   border-radius: 8px;
@@ -866,11 +923,13 @@ h1 span {
   font-family: var(--mono);
   font-size: 16px;
   color: var(--muted);
+  text-align: left;
 }
 .sc-svc-cost {
   font-family: var(--mono);
   font-size: 16px;
   font-weight: 500;
+  text-align: right;
   flex-shrink: 0;
 }
 .sc-divider {

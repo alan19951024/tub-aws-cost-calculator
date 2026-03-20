@@ -1,685 +1,1453 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AWS 雲端架構成本計算</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tub_style.css">
-</head>
-<body>
-<div class="page">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS 雲端架構成本計算</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="tub_style.css" />
+  </head>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <div class="eyebrow"><span class="pulse"></span>AWS · 台灣OO銀行 · ap-northeast-1 東京</div>
-    <h1>賦能計畫-IV<br><span>AWS 成本計算課程</span></h1>
-    <p class="subtitle">Asia Pacific (Tokyo) ap-northeast-1 · Multi-AZ · CloudFront + ALB + EC2 + Aurora PostgreSQL + S3</p>
-  </div>
-  <div class="total-card">
-    <div class="total-label">每月估算費用</div>
-    <div class="total-value" id="hdr-total" style="filter:blur(10px);user-select:none;transition:filter .4s ease;">$822</div>
-    <div class="total-sub">USD / month · On-Demand · 東京(ap-northeast-1)</div>
-    <button class="reveal-btn" id="reveal-btn" onclick="revealTotal()">👁 顯示金額</button>
-  </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('arch',this)">📐 專案架構圖</button>
-  <button class="tab-btn" onclick="switchTab('summary',this)">📊 架構費用估算</button>
-  <button class="tab-btn" onclick="switchTab('howto',this)">📖 計算詳細說明</button>
-</div>
-
-<!-- ═══ TAB: 架構圖 ═══ -->
-<div class="tab-content active" id="tab-arch">
-
-  <!-- PROJECT SCENARIO BANNER -->
-  <div class="scenario-banner">
-    <div class="sb-header">
-      <div class="sb-tag">📋 專案情境</div>
-      <div class="sb-title">台灣OO銀行 — 數位轉型計畫</div>
-      <div class="sb-subtitle">Taiwan OO Bank · Digital Transformation Initiative · 2026</div>
-    </div>
-    <div class="sb-body">
-      <div class="sb-section">
-        <div class="sb-section-title">🏦 背景說明</div>
-        <p class="sb-text">台灣OO銀行擁有超過 150 萬名個人與企業客戶，長期以傳統地端（On-Premises）資料中心運行核心業務系統。隨著數位金融浪潮衝擊，銀行決策層決定啟動「數位轉型計畫」，目標是將銀行的網路應用系統遷移至 AWS 雲端，以提升系統彈性、降低維運成本，並達到金管會要求的業務連續性（BCP）規範。</p>
-      </div>
-      <div class="sb-section">
-        <div class="sb-section-title">🎯 專案目標</div>
-        <div class="sb-goals">
-          <div class="sb-goal"><span class="sb-goal-icon">⚡</span><div><strong>高可用性</strong><br><span>採用 Multi-AZ 架構，確保 99.99% 系統上線率，符合金管會 BCP 規範</span></div></div>
-          <div class="sb-goal"><span class="sb-goal-icon">🔒</span><div><strong>資安合規</strong><br><span>三層式網路隔離（Public / Private / Isolated Subnet），保護客戶金融資料</span></div></div>
-          <div class="sb-goal"><span class="sb-goal-icon">📈</span><div><strong>彈性擴展</strong><br><span>透過 CloudFront + ALB 因應假日、發薪日等流量尖峰，自動分流</span></div></div>
-          <div class="sb-goal"><span class="sb-goal-icon">💰</span><div><strong>成本可視化</strong><br><span>建立雲端成本儀表板，讓管理層清楚掌握每月 AWS 費用結構</span></div></div>
+  <body>
+    <div class="page">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-left">
+          <div class="eyebrow">
+            <span class="pulse"></span>AWS · 台灣OO銀行 · ap-northeast-1 東京
+          </div>
+          <h1>賦能計畫-IV<br /><span>AWS 成本計算課程</span></h1>
+          <p class="subtitle">
+            Multi-AZ · CloudFront + ALB + EC2 + Aurora PostgreSQL + S3
+          </p>
+        </div>
+        <div class="total-card">
+          <div class="total-label">每月估算費用</div>
+          <div
+            class="total-value"
+            id="hdr-total"
+            style="
+              filter: blur(10px);
+              user-select: none;
+              transition: filter 0.4s ease;
+            ">
+            $822
+          </div>
+          <div class="total-sub">
+            USD / month · On-Demand · 東京(ap-northeast-1)
+          </div>
+          <button class="reveal-btn" id="reveal-btn" onclick="revealTotal()">
+            👁 顯示金額
+          </button>
         </div>
       </div>
-      <div class="sb-section">
-        <div class="sb-section-title">🗓 專案時間軸</div>
-        <div class="sb-timeline">
-          <div class="sb-tl-item"><div class="sb-tl-dot tl-now"></div><div class="sb-tl-content"><strong>Phase 1 — 架構設計</strong><span>需求分析、AWS 架構規劃、成本估算</span></div><div class="sb-tl-tag now">進行中</div></div>
-          <div class="sb-tl-item"><div class="sb-tl-dot tl-next"></div><div class="sb-tl-content"><strong>Phase 2 — 雲端部署</strong><span>VPC 建置、EC2/Aurora 部署、CloudFront 設定</span></div><div class="sb-tl-tag next">待執行</div></div>
-          <div class="sb-tl-item"><div class="sb-tl-dot tl-next"></div><div class="sb-tl-content"><strong>Phase 3 — 資料遷移</strong><span>現有地端資料遷移至 Aurora PostgreSQL</span></div><div class="sb-tl-tag next">待執行</div></div>
-          <div class="sb-tl-item"><div class="sb-tl-dot tl-next"></div><div class="sb-tl-content"><strong>Phase 4 — 上線驗收</strong><span>壓力測試、資安稽核、正式切換</span></div><div class="sb-tl-tag next">待執行</div></div>
-        </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('arch', this)">
+          專案架構圖
+        </button>
+        <button class="tab-btn" onclick="switchTab('summary', this)">
+          架構費用估算
+        </button>
+        <button class="tab-btn" onclick="switchTab('howto', this)">
+          計算詳細說明
+        </button>
       </div>
-      <div class="sb-section">
-        <div class="sb-section-title">👤 你的角色</div>
-        <p class="sb-text">你是本次專案的 <strong>AWS 雲端架構師</strong>，負責依照銀行的業務需求設計三層式架構（Web Tier、AP Tier、DB Tier），並完成雲端成本估算，向財務長（CFO）進行費用簡報。請根據下方架構圖，完成本次課程的成本計算練習。</p>
-      </div>
-    </div>
-  </div>
 
-  <div class="arch-wrap" style="margin-top:20px;">
-    <img src="./0313.png" alt="三層架構圖">
-    <div class="arch-caption">Taiwan OO Bank — AWS Three-Tier Architecture · 課程架構圖</div>
-  </div>
-</div>
-
-
-<!-- ═══ TAB: 摘要 ═══ -->
-<div class="tab-content" id="tab-summary">
-<div class="sum-wrap">
-
-  <!-- 練習題 -->
-  <div>
-    <div class="sec-title">📝 學員練習題</div>
-
-    <div class="quiz-card" id="q1">
-      <div class="quiz-header">
-        <div class="quiz-badge">綜合題</div>
-        <div class="quiz-topic">整體架構月費試算 — 請用 AWS Pricing Calculator 完成</div>
-        <button class="quiz-toggle" onclick="toggleAnswer('q1')">顯示答案</button>
-      </div>
-      <div class="quiz-body">
-        <p class="quiz-q">OO銀行數位轉型專案，在 <strong>Asia Pacific (Tokyo)</strong> 部署以下架構，請使用 AWS Pricing Calculator 估算本月總費用，並截圖 Summary 頁面作為作業繳交。</p>
-        <div class="quiz-conditions">
-          <div class="qc-title">📋 本月使用條件</div>
-          <div class="qc-grid">
-            <div class="qc-row"><span class="qc-svc">🌐 Route 53</span><span class="qc-val">1 Hosted Zone · <strong>50 萬 queries</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">☁️ CloudFront</span><span class="qc-val">流量 <strong>800 GB</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">⚖️ ALB</span><span class="qc-val">HTTP 請求 <strong>50 萬次 / 月</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">🛡️ NAT Gateway</span><span class="qc-val">出站流量 <strong>80 GB</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">🖥️ EC2 WEB Tier × 2</span><span class="qc-val">t3.medium · <strong>24hr / 天 × 30 天</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">🖥️ EC2 AP Tier × 2</span><span class="qc-val">t3.medium · <strong>24hr / 天 × 30 天</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">💾 EBS gp3 × 4</span><span class="qc-val">每台 <strong>50 GB</strong>（WEB×2 + AP×2）</span></div>
-            <div class="qc-row"><span class="qc-svc">🔴 Aurora PostgreSQL db.r6g.large</span><span class="qc-val">Primary + Replica · 儲存 <strong>120 GB</strong></span></div>
-            <div class="qc-row"><span class="qc-svc">🪣 S3 Standard</span><span class="qc-val">儲存 <strong>300 GB</strong></span></div>
+      <!-- ═══ TAB: 架構圖 ═══ -->
+      <div class="tab-content active" id="tab-arch">
+        <!-- PROJECT SCENARIO BANNER -->
+        <div class="scenario-banner">
+          <div class="sb-header">
+            <div class="sb-tag">📋 專案情境</div>
+            <div class="sb-title">台灣OO銀行 — 數位轉型計畫</div>
+            <div class="sb-subtitle">
+              Taiwan OO Bank · Digital Transformation Initiative · 2026
+            </div>
+          </div>
+          <div class="sb-body">
+            <div class="sb-section">
+              <div class="sb-section-title">🏦 背景說明</div>
+              <p class="sb-text">
+                台灣OO銀行擁有超過 150
+                萬名個人與企業客戶，長期以傳統地端（On-Premises）資料中心運行核心業務系統。隨著數位金融浪潮衝擊，銀行決策層決定啟動「數位轉型計畫」，目標是將銀行的網路應用系統遷移至
+                AWS
+                雲端，以提升系統彈性、降低維運成本，並達到金管會要求的業務連續性（BCP）規範。
+              </p>
+            </div>
+            <div class="sb-section">
+              <div class="sb-section-title">🎯 專案目標</div>
+              <div class="sb-goals">
+                <div class="sb-goal">
+                  <span class="sb-goal-icon">⚡</span>
+                  <div>
+                    <strong>高可用性</strong><br /><span>採用 Multi-AZ 架構，確保 99%
+                      系統上線率，符合金管會 BCP
+                      規範</span>
+                  </div>
+                </div>
+                <div class="sb-goal">
+                  <span class="sb-goal-icon">🔒</span>
+                  <div>
+                    <strong>資安合規</strong><br /><span>三層式網路隔離（Public / Private /
+                      Isolated
+                      Subnet），保護客戶金融資料</span>
+                  </div>
+                </div>
+                <div class="sb-goal">
+                  <span class="sb-goal-icon">📈</span>
+                  <div>
+                    <strong>彈性擴展</strong><br /><span>透過 CloudFront + ALB
+                      因應假日、特殊活動日等流量尖峰，自動分流</span>
+                  </div>
+                </div>
+                <div class="sb-goal">
+                  <span class="sb-goal-icon">💰</span>
+                  <div>
+                    <strong>成本可視化</strong><br /><span>建立雲端成本預估，讓管理層清楚掌握 AWS
+                      費用結構</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sb-section">
+              <div class="sb-section-title">🗓 專案時間軸</div>
+              <div class="sb-timeline">
+                <div class="sb-tl-item">
+                  <div class="sb-tl-dot tl-now"></div>
+                  <div class="sb-tl-content">
+                    <strong>Phase 1 — 架構設計</strong><span>需求分析、AWS
+                      架構規劃、成本估算</span>
+                  </div>
+                  <div class="sb-tl-tag now">進行中</div>
+                </div>
+                <div class="sb-tl-item">
+                  <div class="sb-tl-dot tl-next"></div>
+                  <div class="sb-tl-content">
+                    <strong>Phase 2 — 雲端部署</strong><span>VPC 建置、EC2/Aurora
+                      部署、CloudFront 設定</span>
+                  </div>
+                  <div class="sb-tl-tag next">待執行</div>
+                </div>
+                <div class="sb-tl-item">
+                  <div class="sb-tl-dot tl-next"></div>
+                  <div class="sb-tl-content">
+                    <strong>Phase 3 — 資料遷移</strong><span>現有地端資料遷移至 Aurora
+                      PostgreSQL</span>
+                  </div>
+                  <div class="sb-tl-tag next">待執行</div>
+                </div>
+                <div class="sb-tl-item">
+                  <div class="sb-tl-dot tl-next"></div>
+                  <div class="sb-tl-content">
+                    <strong>Phase 4 — 上線驗收</strong><span>壓力測試、資安稽核、正式切換</span>
+                  </div>
+                  <div class="sb-tl-tag next">待執行</div>
+                </div>
+              </div>
+            </div>
+            <div class="sb-section">
+              <div class="sb-section-title">👤 你的角色</div>
+              <p class="sb-text">
+                你是本次專案的
+                <strong>AWS 雲端架構師</strong>，負責依照銀行的業務需求設計三層式架構（Web Tier、AP
+                Tier、DB
+                Tier），並完成雲端成本估算，向財務長（CFO）進行費用簡報。請根據下方架構圖，完成本次課程的成本計算練習。
+              </p>
+            </div>
           </div>
         </div>
-        <div class="quiz-hint">💡 前往 <a href="https://calculator.aws/pricing/2/home" target="_blank" style="color:var(--blue)">calculator.aws</a> → Create estimate → 逐項新增服務，Region 一律選 <strong>Asia Pacific (Tokyo)</strong></div>
+
+        <div class="arch-wrap" style="margin-top: 20px">
+          <img
+            src="0313.png"
+            alt="三層架構圖"
+            id="arch-img"
+            onclick="openArchModal()" />
+          <div class="arch-caption">
+            Taiwan OO Bank — AWS Three-Tier Architecture ·
+            課程架構圖（點擊查看大圖）
+          </div>
+        </div>
+
+        <div id="arch-modal" class="arch-modal" onclick="closeArchModal(event)">
+          <div class="arch-modal-content" onclick="event.stopPropagation()">
+            <button class="arch-modal-close" onclick="closeArchModal(event)">
+              ✕
+            </button>
+            <img src="0313.png" alt="三層架構圖大圖" />
+            <div class="arch-modal-label">三層架構圖 — 點擊空白區關閉</div>
+          </div>
+        </div>
       </div>
 
-      <div class="quiz-answer" id="q1-ans">
-        <div class="ans-label">✅ 參考答案 + AWS Pricing Calculator 操作流程</div>
+      <!-- ═══ TAB: 摘要 ═══ -->
+      <div class="tab-content" id="tab-summary">
+        <div class="sum-wrap">
+          <!-- 練習題 -->
+          <div>
+            <div class="sec-title">📝 學員練習題</div>
 
-        <!-- Step-by-step calculator guide -->
-        <div class="calc-steps-wrap">
+            <div class="quiz-card" id="q1">
+              <div class="quiz-header">
+                <div class="quiz-badge">綜合題</div>
+                <div class="quiz-topic">
+                  整體架構月費試算 — 請用 AWS Pricing Calculator 完成
+                </div>
+                <button class="quiz-toggle" onclick="toggleAnswer('q1')">
+                  顯示答案
+                </button>
+              </div>
+              <div class="quiz-body">
+                <p class="quiz-q">
+                  OO銀行數位轉型專案，在
+                  <strong>Asia Pacific (Tokyo)</strong> 部署以下架構，請使用 AWS
+                  Pricing Calculator 估算本月總費用，並截圖 Summary
+                  頁面作為作業繳交。
+                </p>
+                <div class="quiz-conditions">
+                  <div class="qc-title">📋 本月使用條件</div>
+                  <div class="qc-grid">
+                    <div class="qc-row">
+                      <span class="qc-svc">🌐 Route 53</span><span
+                        class="qc-val">1 Hosted Zone ·
+                        <strong>50 萬 queries(standard)</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">☁️ CloudFront</span><span
+                        class="qc-val">流量 <strong>800 GB(Asia
+                          Pacific)</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🔀 ALB</span><span
+                        class="qc-val">HTTP 請求
+                        <strong>50 萬次 / 月</strong>，單次請求大小<strong>
+                          32 KB</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🛡️ NAT Gateway</span><span
+                        class="qc-val">出站流量 <strong>80 GB</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🖥️ EC2 WEB Tier × 2</span><span
+                        class="qc-val">t3.medium · <strong>24hr / 天 × 30
+                          天</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🖥️ EC2 AP Tier × 2</span><span
+                        class="qc-val">t3.medium · <strong>24hr / 天 × 30
+                          天</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">💾 EBS gp3 × 4</span><span
+                        class="qc-val">每台 <strong>50 GB</strong>（WEB×2 +
+                        AP×2）</span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🛢️ Aurora PostgreSQL </span><span
+                        class="qc-val"><strong>db.r6g.large </strong>( Primary +
+                        Replica )，
+                        儲存 <strong>120 GB</strong></span>
+                    </div>
+                    <div class="qc-row">
+                      <span class="qc-svc">🪣 S3 Standard</span><span
+                        class="qc-val">儲存 <strong>300 GB</strong></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="quiz-hint">
+                  💡 前往
+                  <a
+                    href="https://calculator.aws/#/"
+                    target="_blank"
+                    style="color: var(--blue)">calculator.aws</a>
+                  → Create estimate → 逐項新增服務，Region 一律選
+                  <strong>Asia Pacific (Tokyo)</strong>
+                </div>
+              </div>
 
-          <div class="calc-step">
-            <div class="cs-num">STEP 1</div>
-            <div class="cs-content">
-              <div class="cs-title">建立新的 Estimate</div>
-              <div class="cs-body">進入 <code>calculator.aws</code> → 點選 <strong>「Create estimate」</strong> → 搜尋服務時，每個服務都要確認 Region 選為 <strong>Asia Pacific (Tokyo)</strong></div>
+              <div class="quiz-answer" id="q1-ans">
+                <div class="ans-label">
+                  ✅ 參考答案 + AWS Pricing Calculator 操作流程
+                </div>
+
+                <!-- Step-by-step calculator guide -->
+                <div class="calc-steps-wrap">
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 1</div>
+                    <div class="cs-content">
+                      <div class="cs-title">建立新的 Estimate</div>
+                      <div class="cs-body">
+                        進入 <code>calculator.aws</code> → 點選
+                        <strong>「Create estimate」</strong> →
+                        搜尋服務時，每個服務都要確認 Region 選為
+                        <strong>Asia Pacific (Tokyo)</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 2</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 Amazon Route 53</div>
+                      <div class="cs-body">
+                        搜尋 <code>Route 53</code> → Add to estimate<br />
+                        • Hosted Zones: <strong>1</strong><br />
+                        • DNS Queries: <strong>500,000 / 月</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 9</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 EC2 WEB Tier × 2</div>
+                      <div class="cs-body">
+                        搜尋 <code>EC2</code> → Add to estimate<br />
+                        • OS: Linux · Instance type:
+                        <code>t3.medium</code><br />
+                        • Pricing model: <strong>On-Demand</strong><br />
+                        • Usage: <strong>24 hours/day × 30 days</strong> ·
+                        數量：<strong>2</strong><br />
+                        • Storage: EBS gp3 · <strong>50 GB / 台</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 10</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 EC2 AP Tier × 2</div>
+                      <div class="cs-body">
+                        再次搜尋 <code>EC2</code> → Add to
+                        estimate（另建一組）<br />
+                        • OS: Linux · Instance type:
+                        <code>t3.medium</code><br />
+                        • Pricing model: <strong>On-Demand</strong><br />
+                        • Usage: <strong>24 hours/day × 30 days</strong> ·
+                        數量：<strong>2</strong><br />
+                        • Storage: EBS gp3 · <strong>50 GB / 台</strong><br />
+                        •
+                        <em>WEB Tier 與 AP Tier
+                          規格相同，但功能不同，分開建立方便辨識</em>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 3</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 Amazon Aurora PostgreSQL</div>
+                      <div class="cs-body">
+                        搜尋 <code>Aurora</code> → Add to estimate<br />
+                        • Engine: <strong>Aurora
+                          PostgreSQL-Compatible</strong><br />
+                        • Instance type: <code>db.r6g.large</code><br />
+                        • Quantity: <strong>2</strong>（1 Primary + 1
+                        Replica，各自計費）<br />
+                        • Utilization:
+                        <strong>100%</strong>（On-Demand，全月運行）<br />
+                        • Storage: <strong>120 GB</strong><br />
+                        • RDS 代理 → 選「<strong>否</strong>」<br />
+                        • Database Insights → 選「<strong>否</strong>」<br />
+                        • RDS Extended Support → 選「<strong>否</strong>」
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 4</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 Amazon S3</div>
+                      <div class="cs-body">
+                        搜尋 <code>S3</code> → Add to estimate<br />
+                        • Storage class: <strong>S3 Standard</strong><br />
+                        • Storage amount: <strong>300 GB</strong><br />
+                        • GET/PUT requests 保留預設即可
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 5</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 Amazon CloudFront</div>
+                      <div class="cs-body">
+                        搜尋 <code>CloudFront</code> → Add to estimate<br />
+                        • Data transfer out to internet:
+                        <strong>800 GB(10萬人次網頁造訪 X 8MB/次)</strong><br />
+                        • Region：選 <strong>亞太地區</strong><br />
+                        • HTTPS requests 可保留預設
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 6</div>
+                    <div class="cs-content">
+                      <div class="cs-title">
+                        新增 Elastic Load Balancing（ALB）
+                      </div>
+                      <div class="cs-body">
+                        搜尋 <code>Elastic Load Balancing</code> → Add to
+                        estimate<br />
+                        • Load balancer type:
+                        <strong>Application Load Balancer</strong><br />
+                        • Number of Application Load Balancers:
+                        <strong>1</strong><br />
+                        •
+                        <strong>Processed bytes（已處理的位元組）: 16 GB(500,000 × 32
+                          KB) / month </strong>，單位選「<strong>GB
+                          每個月</strong>」<br />
+                        • Number of rules:
+                        <strong>10</strong>（預設值即可）<br />
+                        • New connections per second: <strong>1</strong><br />
+                        • Avg processing time:
+                        <strong>1 ms</strong>（預設）<br />
+                        • ⚠️ 「每個 ALB 每秒的平均請求數量」填
+                        <strong>1</strong>，不要填 500,000（那是每月總量）
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step">
+                    <div class="cs-num">STEP 7</div>
+                    <div class="cs-content">
+                      <div class="cs-title">新增 NAT Gateway（VPC）</div>
+                      <div class="cs-body">
+                        搜尋 <code>VPC</code> → Add to estimate<br />
+                        • Number of NAT Gateways: <strong>1</strong><br />
+                        • Data Processed per NAT Gateway:
+                        <strong>80 GB / 月</strong><br />
+                        • 【區域 NAT 閘道】為必填欄位，填入：<br />
+                        &nbsp;&nbsp;– Number of Regional NAT Gateways:
+                        <strong>1</strong><br />
+                        &nbsp;&nbsp;– Number of Availability Zone:
+                        <strong>1</strong><br />
+                        &nbsp;&nbsp;– Data processed per Regional NAT Gateway:
+                        <strong>0 GB</strong>（流量填0，僅產生固定費）<br />
+                        • ⚠️ 「區域 NAT 閘道」為必填，流量填
+                        <strong>0 GB</strong> 即可，費用不會增加
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="calc-step cs-last">
+                    <div class="cs-num">STEP 8</div>
+                    <div class="cs-content">
+                      <div class="cs-title">檢視 Summary 並截圖</div>
+                      <div class="cs-body">
+                        所有服務新增完成後，點選右上角
+                        <strong>「View summary」</strong>，確認各服務明細與總金額後截圖繳交。
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Answer formula -->
+                <div style="margin-top: 18px">
+                  <div class="ans-label">🧮 手動計算參考</div>
+                  <div class="ans-formula">
+                    Route 53 ：$0.50 + 0.5×$0.40 = $0.70<br />CloudFront ：800GB
+                    × $0.120/GB（Japan 費率） = $96.00<br />ALB ：固定費 $5.76 +
+                    LCU ≈ $17.87<br />NAT Gateway ：$0.045×720 + 80×$0.045 +
+                    區域NAT費 = $50.22<br />EC2 WEB × 2 ：$0.0552×720hr×2 + EBS
+                    50GB×$0.096×2 = $89.02<br />EC2 AP × 2 ：$0.0552×720hr×2 +
+                    EBS 50GB×$0.096×2 = $89.02<br />Aurora PG
+                    ：$0.3195×720×2 + 120×$0.10 = $472.01<br />S3 ：300GB ×
+                    $0.025 =
+                    $7.50<br />────────────────────────────────────────────────────────<br /><strong>合計約：$822.34
+                      / 月</strong>
+                  </div>
+                  <div class="ans-note" style="margin-top: 10px">
+                    📊 <strong>費用集中在兩個服務</strong>：Aurora PostgreSQL
+                    $472（57%）+ EC2×4 $178（22%）合計佔 79%。NAT Gateway $50
+                    含區域 NAT 閘道固定費，CloudFront $96 採 $0.120/GB Japan
+                    費率。
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="calc-step">
-            <div class="cs-num">STEP 2</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 Amazon Route 53</div>
-              <div class="cs-body">搜尋 <code>Route 53</code> → Add to estimate<br>
-              • Hosted Zones: <strong>1</strong><br>
-              • DNS Queries: <strong>500,000 / 月</strong></div>
+          <!-- 費用明細表格 -->
+          <div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-bottom: 10px;
+              ">
+              <div class="sec-title">本月費用明細</div>
+              <button
+                class="toggle-btn"
+                id="toggle-cost-btn"
+                onclick="toggleCostDetails()">
+                隱藏明細
+              </button>
+            </div>
+            <div id="cost-detail-wrap" class="sum-table-wrap">
+              <table class="sum-table">
+                <thead>
+                  <tr>
+                    <th>服務</th>
+                    <th>層級</th>
+                    <th>計費邏輯</th>
+                    <th>月費 (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Amazon Route 53</td>
+                    <td><span class="tag tag-w">WEB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      1 zone 月費 + 50萬 queries ÷ 100萬 × query單價
+                    </td>
+                    <td style="color: var(--accent)">$0.7</td>
+                  </tr>
+                  <tr>
+                    <td>Amazon CloudFront</td>
+                    <td><span class="tag tag-w">WEB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      800 GB × Asia Pacific 單價/GB
+                    </td>
+                    <td style="color: var(--accent)">$96</td>
+                  </tr>
+                  <tr>
+                    <td>Application Load Balancer</td>
+                    <td><span class="tag tag-w">WEB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      固定費（$0.008 × 720hr）+ LCU費（Processed bytes 16 GB /
+                      month）
+                    </td>
+                    <td style="color: var(--accent)">$17.87</td>
+                  </tr>
+                  <tr>
+                    <td>NAT Gateway</td>
+                    <td><span class="tag tag-w">WEB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      固定費（單價 × 720hr）+ 80 GB × 流量單價 + 區域NAT固定費
+                    </td>
+                    <td style="color: var(--accent)">$50.22</td>
+                  </tr>
+                  <tr>
+                    <td>EC2 t3.medium × 2（WEB Tier）</td>
+                    <td><span class="tag tag-a">AP</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      t3.medium單價 × 720hr × 2台 + EBS（50GB × 單價 × 2台）
+                    </td>
+                    <td style="color: var(--blue)">$89.02</td>
+                  </tr>
+                  <tr>
+                    <td>EC2 t3.medium × 2（AP Tier）</td>
+                    <td><span class="tag tag-a">AP</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      t3.medium單價 × 720hr × 2台 + EBS（50GB × 單價 × 2台）
+                    </td>
+                    <td style="color: var(--blue)">$89.02</td>
+                  </tr>
+                  <tr>
+                    <td>Aurora PostgreSQL (r6g.large)</td>
+                    <td><span class="tag tag-d">DB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      db.r6g.large單價 × 720hr × 2台（Primary + Replica）+ 120
+                      GB × 儲存單價
+                    </td>
+                    <td style="color: var(--red)">$472.01</td>
+                  </tr>
+                  <tr>
+                    <td>Amazon S3 Standard</td>
+                    <td><span class="tag tag-d">DB</span></td>
+                    <td style="font-size: 12px; color: var(--muted)">
+                      300 GB × 單價/GB
+                    </td>
+                    <td style="color: var(--red)">$7.5</td>
+                  </tr>
+                  <tr class="sum-total-row">
+                    <td colspan="3">
+                      <strong>每月合計（On-Demand · Asia Pacific Tokyo）</strong>
+                    </td>
+                    <td>$822.34</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-howto">
+        <div class="howto-wrap">
+          <!-- Hero -->
+          <div class="howto-hero">
+            <div class="howto-hero-icon">🧮</div>
+            <div>
+              <h2>AWS 成本計算方式與情境說明</h2>
+              <p>
+                AWS
+                採用「用多少付多少」的計費模型，每項服務有獨立的計費單位。本頁說明架構中每個服務的計算公式、東京
+                Region 的費率，以及三種典型使用情境的費用估算。
+              </p>
+              <div class="region-badge">
+                ✅ 所有費率均採用 Asia Pacific (Tokyo) ap-northeast-1
+              </div>
             </div>
           </div>
 
-          <div class="calc-step">
-            <div class="cs-num">STEP 9</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 EC2 WEB Tier × 2</div>
-              <div class="cs-body">搜尋 <code>EC2</code> → Add to estimate<br>
-              • OS: Linux · Instance type: <code>t3.medium</code><br>
-              • Pricing model: <strong>On-Demand</strong><br>
-              • Usage: <strong>24 hours/day × 30 days</strong> · 數量：<strong>2</strong><br>
-              • Storage: EBS gp3 · <strong>50 GB / 台</strong></div>
+          <!-- AWS Pricing Calculator 操作步驟 -->
+          <div style="margin-bottom: 32px">
+            <div class="sec-title">AWS Pricing Calculator 操作步驟</div>
+            <div class="steps-grid">
+              <div class="step">
+                <div class="step-n">01</div>
+                <div class="step-t">建立 Estimate</div>
+                <div class="step-d">
+                  前往 calculator.aws → Create estimate → 選擇
+                  <strong>Asia Pacific (Tokyo)</strong>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">02</div>
+                <div class="step-t">新增 Route 53 + CF</div>
+                <div class="step-d">
+                  Route 53 · 1 Hosted Zone · 50萬 queries。CloudFront · 800GB ·
+                  Asia Pacific
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">03</div>
+                <div class="step-t">新增 EC2 × 4 + EBS × 4</div>
+                <div class="step-d">
+                  WEB Tier t3.medium×2 + AP Tier t3.medium×2，各 24hr/天。EBS
+                  gp3 50GB/台
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">04</div>
+                <div class="step-t">新增 ALB + NAT</div>
+                <div class="step-d">ALB 50萬次/月。NAT Gateway 80GB/月</div>
+              </div>
+              <div class="step">
+                <div class="step-n">05</div>
+                <div class="step-t">新增 Aurora PG + S3</div>
+                <div class="step-d">
+                  Aurora PostgreSQL db.r6g.large · Primary+Replica · 120GB。S3
+                  Standard · 300GB
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">06</div>
+                <div class="step-t">View Summary</div>
+                <div class="step-d">
+                  所有服務新增完成後，確認各服務明細與每月費用金額(Monthly cost)。
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">07</div>
+                <div class="step-t">匯出與共享</div>
+                <div class="step-d">
+                  匯出csv檔案後 → 選擇共享產出公開連結保存。
+                </div>
+              </div>
+            </div>
+
+            <!-- 計費公式卡片 -->
+            <div>
+              <div class="sec-title">各服務計費公式</div>
+              <div class="pricing-grid">
+                <!-- Route 53 -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🌐</div>
+                    <div>
+                      <div class="pc-title">Amazon Route 53</div>
+                      <div class="pc-subtitle">DNS · Global 服務</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = Hosted Zone 費 + Query 費<br />
+                      = $0.50/zone/月 + $0.40/百萬次<br />
+                      <span class="f-comment"># 1 zone + 50萬 q = $0.50 + $0.20 =
+                        $0.70 ≈ $1</span>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">計費重點</div>
+                        <div class="pc-row-val">
+                          Route 53 費用極低，每月不到 $1。<br />主要功能是把
+                          bank.com.tw 解析成 CloudFront 的 IP 位址（DNS
+                          解析），<strong>不處理 HTTP 流量</strong>。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">📐</div>
+                      <div>
+                        <div class="pc-row-label">架構說明</div>
+                        <div class="pc-row-val">
+                          Route 53 與 CloudFront 並排在 Global 層（VPC 外）。<br />用虛線連接
+                          CloudFront 代表「DNS 解析關係」，不是流量路徑。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CloudFront -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">☁️</div>
+                    <div>
+                      <div class="pc-title">Amazon CloudFront</div>
+                      <div class="pc-subtitle">
+                        網路 &amp; CDN · $0.120/GB (Japan)
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 流量(GB) × $0.120/GB<br />
+                      <span class="f-comment"># 東京(Japan) $0.120/GB（AWS Pricing
+                        Calculator Japan
+                        費率）</span><br />
+                      本題：800GB × $0.120 = <strong>$96</strong>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">計費重點</div>
+                        <div class="pc-row-val">
+                          僅計算「傳出流量」(Data Transfer Out)。<br />東京(Japan)
+                          Region $0.120/GB，與台北費率相同，高於美國 $0.085。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">🎯</div>
+                      <div>
+                        <div class="pc-row-label">計算機設定</div>
+                        <div class="pc-row-val">
+                          Service: CloudFront → Data transfer out → Asia
+                          Pacific<br />輸入月流量 GB 數即可
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ALB -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🔀</div>
+                    <div>
+                      <div class="pc-title">Application Load Balancer</div>
+                      <div class="pc-subtitle">Compute · LCU 計費</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 固定費 + LCU 費<br />
+                      固定費 = $0.008/hr × 720hr = $5.76<br />
+                      LCU = max(連線數, 請求數, 頻寬, 規則)<br />
+                      <span class="f-comment"># 一般情境 LCU ≈ $15–20</span>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">LCU 是什麼？</div>
+                        <div class="pc-row-val">
+                          Load Capacity Unit，取四個維度最高值計費：<br />新連線數
+                          / 每秒活躍連線 / 頻寬 / 評估規則數
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">🎯</div>
+                      <div>
+                        <div class="pc-row-label">計算機設定</div>
+                        <div class="pc-row-val">
+                          Load balancer type: Application<br />輸入預估 HTTP
+                          請求數（萬/月）
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- NAT GW -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🛡️</div>
+                    <div>
+                      <div class="pc-title">NAT Gateway</div>
+                      <div class="pc-subtitle">Compute · 固定費+流量費</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 固定費 + 資料處理費<br />
+                      固定費 = $0.045/hr × 720hr = $32.4<br />
+                      資料處理 = 流量(GB) × $0.045/GB<br />
+                      區域 NAT 閘道（必填）= 額外固定費<br />
+                      <span class="f-comment"># 80GB → $32.4 + $3.6 + 區域NAT =
+                        $50.22
+                      </span>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">⚠️</div>
+                      <div>
+                        <div class="pc-row-label">重要概念</div>
+                        <div class="pc-row-val">
+                          NAT GW 有固定費 $32/月，即使流量很少也要付。<br />EC2 連
+                          S3 建議改用 VPC Gateway Endpoint（免費）省去 NAT 費用。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">📐</div>
+                      <div>
+                        <div class="pc-row-label">架構說明</div>
+                        <div class="pc-row-val">
+                          NAT GW 僅處理「出站」流量（Private EC2 → Internet）。<br />入站流量走
+                          IGW → ALB，完全不經過 NAT。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- EC2 -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🖥️</div>
+                    <div>
+                      <div class="pc-title">Amazon EC2 t3.medium</div>
+                      <div class="pc-subtitle">Compute · 按時計費</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      架構共 4 台 EC2（WEB Tier×2 + AP Tier×2）<br />
+                      月費 = EC2費 + EBS費（合併計費）<br />
+                      WEB×2：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 =
+                      <strong>$89.02</strong><br />
+                      AP×2 ：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 =
+                      <strong>$89.02</strong><br />
+                      <span class="f-comment"># EC2+EBS 合計 $178.04（含儲存，與 Pricing
+                        Calculator
+                        一致）</span>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">架構說明</div>
+                        <div class="pc-row-val">
+                          WEB Tier EC2（Private Subnet）：處理 HTTP 請求，接收 ALB
+                          分流。<br />AP Tier EC2（Private
+                          Subnet）：處理商業邏輯，呼叫 Aurora PostgreSQL DB。<br />兩層各部署在
+                          AZ-A、AZ-B，實現 Multi-AZ 高可用。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">🎯</div>
+                      <div>
+                        <div class="pc-row-label">計算機設定</div>
+                        <div class="pc-row-val">
+                          Instance type: t3.medium<br />Pricing: On-Demand ·
+                          設定每天使用時數
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- EBS -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">💾</div>
+                    <div>
+                      <div class="pc-title">Amazon EBS gp3</div>
+                      <div class="pc-subtitle">Storage · 全月計費</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 容量(GB) × $0.08/GB × 台數<br />
+                      架構共 4 台 EC2，掛載 EBS 各 50GB<br />
+                      = 已含於各 EC2 費用中（50GB × $0.096/台，2台/Tier）<br />
+                      <span class="f-comment"># EC2 停機不省 EBS 費！</span>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">⚠️</div>
+                      <div>
+                        <div class="pc-row-label">注意事項</div>
+                        <div class="pc-row-val">
+                          EBS 依「掛載容量」全月計費，EC2 關機不影響 EBS 費用。<br />若要停用請先
+                          Snapshot 再刪除 Volume。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">gp3 特色</div>
+                        <div class="pc-row-val">
+                          3,000 IOPS 基礎免費，無需額外付費。<br />比 gp2 便宜約
+                          20%，銀行一般負載適用。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Aurora -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🛢️</div>
+                    <div>
+                      <div class="pc-title">Amazon Aurora PostgreSQL</div>
+                      <div class="pc-subtitle">
+                        Database · 架構最高費用 · PostgreSQL
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 實例費 + 儲存費 + I/O費<br />
+                      實例 = $0.320/hr × 720hr × 2台 = $460.8<br />
+                      儲存 = 120GB × $0.10/GB = $12<br />
+                      <span class="f-comment"># AWS 實際費率
+                        $0.320/hr（CSV反推），Primary + Replica
+                        各自計費</span><br />
+                      合計 <strong>$472.01（CSV 完全一致）</strong>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">⚠️</div>
+                      <div>
+                        <div class="pc-row-label">為何最貴？</div>
+                        <div class="pc-row-val">
+                          db.r6g.large 是記憶體優化型（16GB
+                          RAM），全月運行費高。<br />通常是整架構費用最高的單一服務。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">📐</div>
+                      <div>
+                        <div class="pc-row-label">架構說明</div>
+                        <div class="pc-row-val">
+                          放在 Isolated Subnet（紅色框），無 Internet 路由，<br />只允許同
+                          VPC 內 EC2 透過 TCP 5432 連線。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- S3 -->
+                <div class="pricing-card">
+                  <div class="pc-header">
+                    <div class="pc-icon">🪣</div>
+                    <div>
+                      <div class="pc-title">Amazon S3 Standard</div>
+                      <div class="pc-subtitle">Storage · Region 級服務</div>
+                    </div>
+                  </div>
+                  <div class="pc-body">
+                    <div class="formula-box">
+                      月費 = 儲存費 + 請求費<br />
+                      儲存 = 300GB × $0.025/GB = $7.5<br />
+                      GET/PUT 請求費 ≈ $0（免費層）<br />
+                      合計約 <strong>$7.50</strong>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">📐</div>
+                      <div>
+                        <div class="pc-row-label">架構說明</div>
+                        <div class="pc-row-val">
+                          S3 是 Region 級服務，放在 VPC 外。<br />使用 VPC Gateway
+                          Endpoint 讓 EC2 私密存取 S3，<br />不需經過 NAT
+                          Gateway（節省 NAT 費用）。
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pc-row">
+                      <div class="pc-row-icon">💡</div>
+                      <div>
+                        <div class="pc-row-label">省費技巧</div>
+                        <div class="pc-row-val">
+                          低頻存取的報表/PDF 可改用 S3 Standard-IA，<br />儲存費用約省
+                          40%（$0.0138/GB）。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /pricing-grid -->
+            </div>
+
+            <!-- 情境試算 -->
+            <div>
+              <div class="sec-title">三種使用情境費用試算</div>
+              <div class="scenario-tabs">
+                <button
+                  class="sc-tab active"
+                  onclick="showScenario('light', this)">
+                  🌙 輕量測試
+                </button>
+                <button class="sc-tab" onclick="showScenario('normal', this)">
+                  ☀️ 正常營運
+                </button>
+                <button class="sc-tab" onclick="showScenario('peak', this)">
+                  🔥 業務高峰
+                </button>
+              </div>
+
+              <!-- Scenario: 輕量測試 -->
+              <div class="scenario-panel active" id="sc-light">
+                <div class="scenario-card">
+                  <div class="scenario-header">
+                    <div>
+                      <div class="scenario-name">🌙 輕量測試情境</div>
+                      <div class="scenario-desc">
+                        非生產環境 · EC2 僅上班時間開機 · 流量極少
+                      </div>
+                    </div>
+                    <div class="scenario-total">~$608 / 月</div>
+                  </div>
+                  <div class="scenario-body">
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🌐</span>
+                        <div>
+                          <div class="sc-svc-name">Route 53</div>
+                          <div class="sc-svc-detail">1 zone · 10萬 queries</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">$0.50 + 極少量 query費</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $1
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>☁️</span>
+                        <div>
+                          <div class="sc-svc-name">CloudFront</div>
+                          <div class="sc-svc-detail">100GB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">100 × $0.120</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $12
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>⚖️</span>
+                        <div>
+                          <div class="sc-svc-name">ALB</div>
+                          <div class="sc-svc-detail">10萬 req/月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">固定費 + 少量LCU</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $8
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🛡️</span>
+                        <div>
+                          <div class="sc-svc-name">NAT Gateway</div>
+                          <div class="sc-svc-detail">10GB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">
+                        NAT固定費 + 流量費 + 區域NAT
+                      </div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $47
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 WEB × 2</div>
+                          <div class="sc-svc-detail">8hr/天 · 上班時間</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2+EBS (8hr/天×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $36
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 AP × 2</div>
+                          <div class="sc-svc-detail">8hr/天 · 上班時間</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2+EBS (8hr/天×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $36
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>💾</span>
+                        <div>
+                          <div class="sc-svc-name">EBS gp3 × 4</div>
+                          <div class="sc-svc-detail">50GB/台</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">50×$0.096×4（已含於上方 EC2 行，不重複計算）</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $19
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🔴</span>
+                        <div>
+                          <div class="sc-svc-name">Aurora PostgreSQL</div>
+                          <div class="sc-svc-detail">db.r6g.large · 50GB</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">$0.320×720×2 + 50×$0.10</div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $466
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🪣</span>
+                        <div>
+                          <div class="sc-svc-name">S3 Standard</div>
+                          <div class="sc-svc-detail">100GB</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">100×$0.025</div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $2.50
+                      </div>
+                    </div>
+                    <div class="sc-divider"></div>
+                    <div class="sc-note">
+                      💡 <strong>Aurora 仍是最大費用</strong>（77%）。EC2 4 台
+                      8hr/天各含EBS合計 $72，Aurora Primary+Replica $466。NAT
+                      固定費約 $47 不因流量少而減少太多，測試環境若改 db.t3.medium
+                      可大幅降低 DB 成本。
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scenario: 正常營運 -->
+              <div class="scenario-panel" id="sc-normal">
+                <div class="scenario-card">
+                  <div class="scenario-header">
+                    <div>
+                      <div class="scenario-name">☀️ 正常營運情境</div>
+                      <div class="scenario-desc">
+                        生產環境 · 24hr/天 · 中等流量 · 本架構基準
+                      </div>
+                    </div>
+                    <div class="scenario-total">~$822 / 月</div>
+                  </div>
+                  <div class="scenario-body">
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🌐</span>
+                        <div>
+                          <div class="sc-svc-name">Route 53</div>
+                          <div class="sc-svc-detail">1 zone · 50萬 queries</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">$0.50 + 0.5×$0.40</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $1
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>☁️</span>
+                        <div>
+                          <div class="sc-svc-name">CloudFront</div>
+                          <div class="sc-svc-detail">800GB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">800 × $0.120</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $96
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>⚖️</span>
+                        <div>
+                          <div class="sc-svc-name">ALB</div>
+                          <div class="sc-svc-detail">50萬 req/月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">固定 + LCU</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $17.87
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🛡️</span>
+                        <div>
+                          <div class="sc-svc-name">NAT Gateway</div>
+                          <div class="sc-svc-detail">80GB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">
+                        NAT固定費 + 流量費 + 區域NAT
+                      </div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $50.22
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 WEB × 2</div>
+                          <div class="sc-svc-detail">24hr/天</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2 + EBS gp3 (50GB×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $89.02
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 AP × 2</div>
+                          <div class="sc-svc-detail">24hr/天</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2 + EBS gp3 (50GB×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $89.02
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>💾</span>
+                        <div>
+                          <div class="sc-svc-name">EBS gp3 × 4</div>
+                          <div class="sc-svc-detail">50GB/台</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">50×$0.096×4（已含於上方 EC2 行，不重複計算）</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $19
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🔴</span>
+                        <div>
+                          <div class="sc-svc-name">Aurora PostgreSQL</div>
+                          <div class="sc-svc-detail">db.r6g.large · 120GB</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">$0.320×720×2 + 120×$0.10</div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $472.01
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🪣</span>
+                        <div>
+                          <div class="sc-svc-name">S3 Standard</div>
+                          <div class="sc-svc-detail">300GB</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">300×$0.025</div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $7.50
+                      </div>
+                    </div>
+                    <div class="sc-divider"></div>
+                    <div class="sc-note">
+                      📊 <strong>費用分佈：</strong>Aurora $472（57%）· EC2×4
+                      $178（22%）· CloudFront $96（12%）· NAT $50（6%）
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scenario: 業務高峰 -->
+              <div class="scenario-panel" id="sc-peak">
+                <div class="scenario-card">
+                  <div class="scenario-header">
+                    <div>
+                      <div class="scenario-name">🔥 業務高峰情境</div>
+                      <div class="scenario-desc">
+                        月底對帳 / 發薪日 · 24hr 全天 · 大流量
+                      </div>
+                    </div>
+                    <div class="scenario-total">~$$1,142 / 月</div>
+                  </div>
+                  <div class="scenario-body">
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🌐</span>
+                        <div>
+                          <div class="sc-svc-name">Route 53</div>
+                          <div class="sc-svc-detail">1 zone · 200萬 queries</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">$0.50 + 2×$0.40</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $1
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>☁️</span>
+                        <div>
+                          <div class="sc-svc-name">CloudFront</div>
+                          <div class="sc-svc-detail">3TB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">3000 × $0.120</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $360
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>⚖️</span>
+                        <div>
+                          <div class="sc-svc-name">ALB</div>
+                          <div class="sc-svc-detail">500萬 req/月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">固定 + 高LCU</div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $48
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🛡️</span>
+                        <div>
+                          <div class="sc-svc-name">NAT Gateway</div>
+                          <div class="sc-svc-detail">300GB / 月</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">
+                        NAT固定費 + 300GB + 區域NAT
+                      </div>
+                      <div class="sc-svc-cost" style="color: var(--accent)">
+                        $60
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 WEB × 2</div>
+                          <div class="sc-svc-detail">24hr/天 · 全天運行</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2+EBS (24hr×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $89.02
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🖥️</span>
+                        <div>
+                          <div class="sc-svc-name">EC2 AP × 2</div>
+                          <div class="sc-svc-detail">24hr/天 · 全天運行</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">EC2+EBS (24hr×2台)</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $89.02
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>💾</span>
+                        <div>
+                          <div class="sc-svc-name">EBS gp3 × 4</div>
+                          <div class="sc-svc-detail">50GB/台</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">50×$0.096×4（已含於上方 EC2 行，不重複計算）</div>
+                      <div class="sc-svc-cost" style="color: var(--blue)">
+                        $19
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🔴</span>
+                        <div>
+                          <div class="sc-svc-name">Aurora PostgreSQL</div>
+                          <div class="sc-svc-detail">
+                            db.r6g.large · 200GB · 高I/O
+                          </div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">
+                        $0.320×720×2 + 200×$0.10 + I/O
+                      </div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $482
+                      </div>
+                    </div>
+                    <div class="sc-svc-row">
+                      <div class="sc-svc-left">
+                        <span>🪣</span>
+                        <div>
+                          <div class="sc-svc-name">S3 Standard</div>
+                          <div class="sc-svc-detail">500GB</div>
+                        </div>
+                      </div>
+                      <div class="sc-svc-formula">500×$0.025</div>
+                      <div class="sc-svc-cost" style="color: var(--red)">
+                        $12.50
+                      </div>
+                    </div>
+                    <div class="sc-divider"></div>
+                    <div class="sc-note">
+                      🔥
+                      <strong>高峰情境 CloudFront 費用暴增到 $360</strong>（32%）。EC2 4
+                      台全天各含EBS合計 $178，佔 16%。CloudFront
+                      快取最佳化可減少 30–50% 流量費。
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 10</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 EC2 AP Tier × 2</div>
-              <div class="cs-body">再次搜尋 <code>EC2</code> → Add to estimate（另建一組）<br>
-              • OS: Linux · Instance type: <code>t3.medium</code><br>
-              • Pricing model: <strong>On-Demand</strong><br>
-              • Usage: <strong>24 hours/day × 30 days</strong> · 數量：<strong>2</strong><br>
-              • Storage: EBS gp3 · <strong>50 GB / 台</strong><br>
-              • <em>WEB Tier 與 AP Tier 規格相同，但功能不同，分開建立方便辨識</em></div>
-            </div>
-          </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 3</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 Amazon Aurora PostgreSQL</div>
-              <div class="cs-body">搜尋 <code>Aurora</code> → Add to estimate<br>
-              • Engine: <strong>Aurora PostgreSQL-Compatible</strong><br>
-              • Instance type: <code>db.r6g.large</code><br>
-              • Quantity: <strong>2</strong>（1 Primary + 1 Replica，各自計費）<br>
-              • Utilization: <strong>100%</strong>（On-Demand，全月運行）<br>
-              • Storage: <strong>120 GB</strong><br>
-              • RDS 代理 → 選「<strong>否</strong>」<br>
-              • Database Insights → 選「<strong>否</strong>」<br>
-              • RDS Extended Support → 選「<strong>否</strong>」</div>
-            </div>
-          </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 4</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 Amazon S3</div>
-              <div class="cs-body">搜尋 <code>S3</code> → Add to estimate<br>
-              • Storage class: <strong>S3 Standard</strong><br>
-              • Storage amount: <strong>300 GB</strong><br>
-              • GET/PUT requests 保留預設即可</div>
-            </div>
-          </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 5</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 Amazon CloudFront</div>
-              <div class="cs-body">搜尋 <code>CloudFront</code> → Add to estimate<br>
-              • Data transfer out to internet: <strong>800 GB</strong><br>
-              • Region：選 <strong>Japan</strong><br>
-              • HTTPS requests 可保留預設</div>
-            </div>
-          </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 6</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 Elastic Load Balancing（ALB）</div>
-              <div class="cs-body">搜尋 <code>Elastic Load Balancing</code> → Add to estimate<br>
-              • Load balancer type: <strong>Application Load Balancer</strong><br>
-              • Number of Application Load Balancers: <strong>1</strong><br>
-              • <strong>Processed bytes（已處理的位元組）: 16 GB / month</strong>，單位選「<strong>GB 每個月</strong>」<br>
-              • Number of rules: <strong>10</strong>（預設值即可）<br>
-              • New connections per second: <strong>1</strong><br>
-              • Avg processing time: <strong>1 ms</strong>（預設）<br>
-              • ⚠️ 「每個 ALB 每秒的平均請求數量」填 <strong>1</strong>，不要填 500,000（那是每月總量）</div>
-            </div>
-          </div>
-
-          <div class="calc-step">
-            <div class="cs-num">STEP 7</div>
-            <div class="cs-content">
-              <div class="cs-title">新增 NAT Gateway（VPC）</div>
-              <div class="cs-body">搜尋 <code>VPC</code> → Add to estimate<br>
-              • NAT 閘道數量: <strong>1</strong><br>
-              • 每個 NAT 閘道處理的資料: <strong>80 GB / 月</strong><br>
-              • 【區域 NAT 閘道】為必填欄位，填入：<br>
-              &nbsp;&nbsp;– 區域 NAT 閘道數量: <strong>1</strong><br>
-              &nbsp;&nbsp;– 可用區域數量: <strong>1</strong><br>
-              &nbsp;&nbsp;– 每個區域 NAT 閘道處理的資料: <strong>0 GB</strong>（流量填0，僅產生固定費）<br>
-              • ⚠️ 「區域 NAT 閘道」為必填，流量填 <strong>0 GB</strong> 即可，費用不會增加</div>
-            </div>
-          </div>
-
-          <div class="calc-step cs-last">
-            <div class="cs-num">STEP 8</div>
-            <div class="cs-content">
-              <div class="cs-title">檢視 Summary 並截圖</div>
-              <div class="cs-body">所有服務新增完成後，點選右上角 <strong>「View summary」</strong>，確認各服務明細與總金額後截圖繳交。</div>
-            </div>
-          </div>
-
         </div>
-
-        <!-- Answer formula -->
-        <div style="margin-top:18px;">
-          <div class="ans-label">🧮 手動計算參考</div>
-          <div class="ans-formula">Route 53    ：$0.50 + 0.5×$0.40                          = $0.70<br>CloudFront  ：800GB × $0.120/GB（Japan 費率）             = $96.00<br>ALB         ：固定費 $5.76 + LCU                          ≈ $17.87<br>NAT Gateway ：$0.045×720 + 80×$0.045 + 區域NAT費          = $50.22<br>EC2 WEB × 2 ：$0.0552×720hr×2 + EBS 50GB×$0.096×2        = $89.02<br>EC2 AP  × 2 ：$0.0552×720hr×2 + EBS 50GB×$0.096×2        = $89.02<br>EBS × 4     ：（含於 EC2 行內，合計）50GB×$0.096×4        = $19.20<br>Aurora PG   ：$0.3195×720×2 + 120×$0.10                   = $472.01<br>S3          ：300GB × $0.025                               = $7.50<br>────────────────────────────────────────────────────────<br><strong>合計：$822.34 / 月（與 AWS Pricing Calculator CSV 完全一致）</strong></div>
-          <div class="ans-note" style="margin-top:10px;">📊 <strong>費用集中在兩個服務</strong>：Aurora PostgreSQL $472（57%）+ EC2×4 $178（22%）合計佔 79%。NAT Gateway $50 含區域 NAT 閘道固定費，CloudFront $96 採 $0.120/GB Japan 費率。<br>以上數字與 AWS Pricing Calculator 匯出 CSV 完全一致（誤差 $0.01）。</div>
-        </div>
+        <!-- /tab-howto -->
       </div>
-    </div>
+      <!-- /page -->
 
-  </div>
-
-  <!-- 費用明細表格 -->
-  <div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
-      <div class="sec-title">本月費用明細</div>
-      <button class="toggle-btn" id="toggle-cost-btn" onclick="toggleCostDetails()">隱藏明細</button>
-    </div>
-    <div id="cost-detail-wrap" class="sum-table-wrap">
-      <table class="sum-table">
-        <thead><tr>
-          <th>服務</th><th>層級</th><th>規格</th><th>計費邏輯</th><th>月費 (USD)</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>Amazon Route 53</td><td><span class="tag tag-w">WEB</span></td><td style="font-size:11.5px;color:var(--muted)">1 Hosted Zone · 50萬 queries</td><td style="font-size:11px;color:var(--muted)">$0.50/zone + $0.40/百萬q</td><td style="color:var(--accent)">$1</td></tr>
-          <tr><td>Amazon CloudFront</td><td><span class="tag tag-w">WEB</span></td><td style="font-size:11.5px;color:var(--muted)">800 GB · Asia Pacific (Tokyo) · Japan</td><td style="font-size:11px;color:var(--muted)">800 × $0.120/GB</td><td style="color:var(--accent)">$96</td></tr>
-          <tr><td>Application Load Balancer</td><td><span class="tag tag-w">WEB</span></td><td style="font-size:11.5px;color:var(--muted)">50 萬 req / 月</td><td style="font-size:11px;color:var(--muted)">固定費 + LCU</td><td style="color:var(--accent)">$17</td></tr>
-          <tr><td>NAT Gateway</td><td><span class="tag tag-w">WEB</span></td><td style="font-size:11.5px;color:var(--muted)">80 GB / 月</td><td style="font-size:11px;color:var(--muted)">$0.045×720 + 80×$0.045 + 區域NAT固定費</td><td style="color:var(--accent)">$50.22</td></tr>
-          <tr><td>EC2 t3.medium × 2（WEB Tier）</td><td><span class="tag tag-a">AP</span></td><td style="font-size:11.5px;color:var(--muted)">24hr / 天 · AZ-A &amp; AZ-B</td><td style="font-size:11px;color:var(--muted)">$0.0552 × 720hr × 2 + EBS</td><td style="color:var(--blue)">$89.02</td></tr>
-          <tr><td>EC2 t3.medium × 2（AP Tier）</td><td><span class="tag tag-a">AP</span></td><td style="font-size:11.5px;color:var(--muted)">24hr / 天 · AZ-A &amp; AZ-B</td><td style="font-size:11px;color:var(--muted)">$0.0552 × 720hr × 2 + EBS</td><td style="color:var(--blue)">$89.02</td></tr>
-          <tr><td>EBS gp3 × 4</td><td><span class="tag tag-a">AP</span></td><td style="font-size:11.5px;color:var(--muted)">50 GB / 台（WEB×2 + AP×2）</td><td style="font-size:11px;color:var(--muted)">50 × $0.096 × 4</td><td style="color:var(--blue)">$19</td></tr>
-          <tr><td>Aurora PostgreSQL (r6g.large)</td><td><span class="tag tag-d">DB</span></td><td style="font-size:11.5px;color:var(--muted)">Primary + Replica · 120 GB</td><td style="font-size:11px;color:var(--muted)">$0.3195×720×2 + 120×$0.10</td><td style="color:var(--red)">$472.01</td></tr>
-          <tr><td>Amazon S3 Standard</td><td><span class="tag tag-d">DB</span></td><td style="font-size:11.5px;color:var(--muted)">300 GB</td><td style="font-size:11px;color:var(--muted)">300 × $0.025/GB</td><td style="color:var(--red)">$8</td></tr>
-          <tr class="sum-total-row"><td colspan="4"><strong>每月合計（On-Demand · Asia Pacific Tokyo）</strong></td><td>$822.34</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div>
-<div class="tab-content" id="tab-howto">
-<div class="howto-wrap">
-
-  <!-- Hero -->
-  <div class="howto-hero">
-    <div class="howto-hero-icon">🧮</div>
-    <div>
-      <h2>AWS 成本計算方式與情境說明</h2>
-      <p>AWS 採用「用多少付多少」的計費模型，每項服務有獨立的計費單位。本頁說明架構中每個服務的計算公式、東京 Region 的費率，以及三種典型使用情境的費用估算。</p>
-      <div class="region-badge">✅ 所有費率均採用 Asia Pacific (Tokyo) ap-northeast-1</div>
-    </div>
-  </div>
-
-  <!-- AWS Pricing Calculator 操作步驟 -->
-  <div style="margin-bottom:32px;">
-    <div class="sec-title">AWS Pricing Calculator 操作步驟</div>
-    <div class="steps-grid">
-      <div class="step"><div class="step-n">01</div><div class="step-t">建立 Estimate</div><div class="step-d">前往 calculator.aws → Create estimate → 選擇 <strong>Asia Pacific (Tokyo)</strong></div></div>
-      <div class="step"><div class="step-n">02</div><div class="step-t">新增 Route 53 + CF</div><div class="step-d">Route 53 · 1 Hosted Zone · 50萬 queries。CloudFront · 800GB · Asia Pacific</div></div>
-      <div class="step"><div class="step-n">03</div><div class="step-t">新增 EC2 × 4 + EBS × 4</div><div class="step-d">WEB Tier t3.medium×2 + AP Tier t3.medium×2，各 24hr/天。EBS gp3 50GB/台</div></div>
-      <div class="step"><div class="step-n">04</div><div class="step-t">新增 ALB + NAT</div><div class="step-d">ALB 50萬次/月。NAT Gateway 80GB/月</div></div>
-      <div class="step"><div class="step-n">05</div><div class="step-t">新增 Aurora PG + S3</div><div class="step-d">Aurora PostgreSQL db.r6g.large · Primary+Replica · 120GB。S3 Standard · 300GB → View Summary</div></div>
-    </div>
-  </div>
-
-  <!-- 計費公式卡片 -->
-  <div>
-    <div class="sec-title">各服務計費公式</div>
-    <div class="pricing-grid">
-
-      <!-- Route 53 -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">🌐</div>
-          <div>
-            <div class="pc-title">Amazon Route 53</div>
-            <div class="pc-subtitle">DNS · Global 服務</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = Hosted Zone 費 + Query 費<br>
-            = $0.50/zone/月 + $0.40/百萬次<br>
-            <span class="f-comment"># 1 zone + 50萬 q = $0.50 + $0.20 = $0.70 ≈ $1</span>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">計費重點</div><div class="pc-row-val">Route 53 費用極低，每月不到 $1。<br>主要功能是把 bank.com.tw 解析成 CloudFront 的 IP 位址（DNS 解析），<strong>不處理 HTTP 流量</strong>。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">📐</div><div><div class="pc-row-label">架構說明</div><div class="pc-row-val">Route 53 與 CloudFront 並排在 Global 層（VPC 外）。<br>用虛線連接 CloudFront 代表「DNS 解析關係」，不是流量路徑。</div></div></div>
-        </div>
-      </div>
-
-      <!-- CloudFront -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">☁️</div>
-          <div>
-            <div class="pc-title">Amazon CloudFront</div>
-            <div class="pc-subtitle">網路 &amp; CDN · $0.120/GB (Japan)</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 流量(GB) × $0.120/GB<br>
-            <span class="f-comment"># 東京(Japan) $0.120/GB（AWS Pricing Calculator Japan 費率）</span><br>
-            本題：800GB × $0.120 = <strong>$96</strong>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">計費重點</div><div class="pc-row-val">僅計算「傳出流量」(Data Transfer Out)。<br>東京(Japan) Region $0.120/GB，與台北費率相同，高於美國 $0.085。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">🎯</div><div><div class="pc-row-label">計算機設定</div><div class="pc-row-val">Service: CloudFront → Data transfer out → Asia Pacific<br>輸入月流量 GB 數即可</div></div></div>
-        </div>
-      </div>
-
-      <!-- ALB -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">⚖️</div>
-          <div>
-            <div class="pc-title">Application Load Balancer</div>
-            <div class="pc-subtitle">Compute · LCU 計費</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 固定費 + LCU 費<br>
-            固定費 = $0.008/hr × 720hr = $5.76<br>
-            LCU = max(連線數, 請求數, 頻寬, 規則)<br>
-            <span class="f-comment"># 一般情境 LCU ≈ $15–20</span>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">LCU 是什麼？</div><div class="pc-row-val">Load Capacity Unit，取四個維度最高值計費：<br>新連線數 / 每秒活躍連線 / 頻寬 / 評估規則數</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">🎯</div><div><div class="pc-row-label">計算機設定</div><div class="pc-row-val">Load balancer type: Application<br>輸入預估 HTTP 請求數（萬/月）</div></div></div>
-        </div>
-      </div>
-
-      <!-- NAT GW -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">🛡️</div>
-          <div>
-            <div class="pc-title">NAT Gateway</div>
-            <div class="pc-subtitle">Compute · 固定費+流量費</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 固定費 + 資料處理費<br>
-            固定費 = $0.045/hr × 720hr = $32.4<br>
-            資料處理 = 流量(GB) × $0.045/GB<br>
-            區域 NAT 閘道（必填）= 額外固定費<br>
-            <span class="f-comment"># 80GB → $32.4 + $3.6 + 區域NAT = $50.22（CSV實際）</span>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">⚠️</div><div><div class="pc-row-label">重要概念</div><div class="pc-row-val">NAT GW 有固定費 $32/月，即使流量很少也要付。<br>EC2 連 S3 建議改用 VPC Gateway Endpoint（免費）省去 NAT 費用。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">📐</div><div><div class="pc-row-label">架構說明</div><div class="pc-row-val">NAT GW 僅處理「出站」流量（Private EC2 → Internet）。<br>入站流量走 IGW → ALB，完全不經過 NAT。</div></div></div>
-        </div>
-      </div>
-
-      <!-- EC2 -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">🖥️</div>
-          <div>
-            <div class="pc-title">Amazon EC2 t3.medium</div>
-            <div class="pc-subtitle">Compute · 按時計費</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            架構共 4 台 EC2（WEB Tier×2 + AP Tier×2）<br>
-            月費 = EC2費 + EBS費（合併計費）<br>
-            WEB×2：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 = <strong>$89.02</strong><br>
-            AP×2 ：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 = <strong>$89.02</strong><br>
-            <span class="f-comment"># EC2+EBS 合計 $178.04（含儲存，與 Pricing Calculator 一致）</span>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">架構說明</div><div class="pc-row-val">WEB Tier EC2（Private Subnet）：處理 HTTP 請求，接收 ALB 分流。<br>AP Tier EC2（Private Subnet）：處理商業邏輯，呼叫 Aurora PostgreSQL DB。<br>兩層各部署在 AZ-A、AZ-B，實現 Multi-AZ 高可用。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">🎯</div><div><div class="pc-row-label">計算機設定</div><div class="pc-row-val">Instance type: t3.medium<br>Pricing: On-Demand · 設定每天使用時數</div></div></div>
-        </div>
-      </div>
-
-      <!-- EBS -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">💾</div>
-          <div>
-            <div class="pc-title">Amazon EBS gp3</div>
-            <div class="pc-subtitle">Storage · 全月計費</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 容量(GB) × $0.08/GB × 台數<br>
-            架構共 4 台 EC2，掛載 EBS 各 50GB<br>            = 已含於各 EC2 費用中（50GB × $0.096/台，2台/Tier）<br>
-            <span class="f-comment"># EC2 停機不省 EBS 費！</span>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">⚠️</div><div><div class="pc-row-label">注意事項</div><div class="pc-row-val">EBS 依「掛載容量」全月計費，EC2 關機不影響 EBS 費用。<br>若要停用請先 Snapshot 再刪除 Volume。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">gp3 特色</div><div class="pc-row-val">3,000 IOPS 基礎免費，無需額外付費。<br>比 gp2 便宜約 20%，銀行一般負載適用。</div></div></div>
-        </div>
-      </div>
-
-      <!-- Aurora -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">🔴</div>
-          <div>
-            <div class="pc-title">Amazon Aurora PostgreSQL</div>
-            <div class="pc-subtitle">Database · 架構最高費用 · PostgreSQL</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 實例費 + 儲存費 + I/O費<br>
-            實例 = $0.320/hr × 720hr × 2台 = $460.8<br>
-            儲存 = 120GB × $0.10/GB = $12<br>
-            <span class="f-comment"># AWS 實際費率 $0.320/hr（CSV反推），Primary + Replica 各自計費</span><br>
-            合計 <strong>$472.01（CSV 完全一致）</strong>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">⚠️</div><div><div class="pc-row-label">為何最貴？</div><div class="pc-row-val">db.r6g.large 是記憶體優化型（16GB RAM），全月運行費高。<br>通常是整架構費用最高的單一服務。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">📐</div><div><div class="pc-row-label">架構說明</div><div class="pc-row-val">放在 Isolated Subnet（紅色框），無 Internet 路由，<br>只允許同 VPC 內 EC2 透過 TCP 5432 連線。</div></div></div>
-        </div>
-      </div>
-
-      <!-- S3 -->
-      <div class="pricing-card">
-        <div class="pc-header">
-          <div class="pc-icon">🪣</div>
-          <div>
-            <div class="pc-title">Amazon S3 Standard</div>
-            <div class="pc-subtitle">Storage · Region 級服務</div>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="formula-box">
-            月費 = 儲存費 + 請求費<br>
-            儲存 = 300GB × $0.025/GB = $7.5<br>
-            GET/PUT 請求費 ≈ $0（免費層）<br>            合計約 <strong>$7.50（本題，CSV實際）</strong>
-          </div>
-          <div class="pc-row"><div class="pc-row-icon">📐</div><div><div class="pc-row-label">架構說明</div><div class="pc-row-val">S3 是 Region 級服務，放在 VPC 外。<br>使用 VPC Gateway Endpoint 讓 EC2 私密存取 S3，<br>不需經過 NAT Gateway（節省 NAT 費用）。</div></div></div>
-          <div class="pc-row"><div class="pc-row-icon">💡</div><div><div class="pc-row-label">省費技巧</div><div class="pc-row-val">低頻存取的報表/PDF 可改用 S3 Standard-IA，<br>儲存費用約省 40%（$0.0138/GB）。</div></div></div>
-        </div>
-      </div>
-
-    </div><!-- /pricing-grid -->
-  </div>
-
-  <!-- 情境試算 -->
-  <div>
-    <div class="sec-title">三種使用情境費用試算</div>
-    <div class="scenario-tabs">
-      <button class="sc-tab active" onclick="showScenario('light',this)">🌙 輕量測試</button>
-      <button class="sc-tab" onclick="showScenario('normal',this)">☀️ 正常營運</button>
-      <button class="sc-tab" onclick="showScenario('peak',this)">🔥 業務高峰</button>
-    </div>
-
-    <!-- Scenario: 輕量測試 -->
-    <div class="scenario-panel active" id="sc-light">
-      <div class="scenario-card">
-        <div class="scenario-header">
-          <div>
-            <div class="scenario-name">🌙 輕量測試情境</div>
-            <div class="scenario-desc">非生產環境 · EC2 僅上班時間開機 · 流量極少</div>
-          </div>
-          <div class="scenario-total">~$594 / 月</div>
-        </div>
-        <div class="scenario-body">
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🌐</span><div><div class="sc-svc-name">Route 53</div><div class="sc-svc-detail">1 zone · 10萬 queries</div></div></div>
-            <div class="sc-svc-formula">$0.50 + 極少量 query費</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$1</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>☁️</span><div><div class="sc-svc-name">CloudFront</div><div class="sc-svc-detail">100GB / 月</div></div></div>
-            <div class="sc-svc-formula">100 × $0.120</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$12</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>⚖️</span><div><div class="sc-svc-name">ALB</div><div class="sc-svc-detail">10萬 req/月</div></div></div>
-            <div class="sc-svc-formula">固定費 + 少量LCU</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$8</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🛡️</span><div><div class="sc-svc-name">NAT Gateway</div><div class="sc-svc-detail">10GB / 月</div></div></div>
-            <div class="sc-svc-formula">NAT固定費 + 流量費 + 區域NAT</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$47</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 WEB × 2</div><div class="sc-svc-detail">8hr/天 · 上班時間</div></div></div>
-            <div class="sc-svc-formula">EC2+EBS (8hr/天×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$36</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 AP × 2</div><div class="sc-svc-detail">8hr/天 · 上班時間</div></div></div>
-            <div class="sc-svc-formula">EC2+EBS (8hr/天×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$36</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>💾</span><div><div class="sc-svc-name">EBS gp3 × 4</div><div class="sc-svc-detail">50GB/台</div></div></div>
-            <div class="sc-svc-formula">50×$0.096×4（含於EC2行）</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$19</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🔴</span><div><div class="sc-svc-name">Aurora PostgreSQL</div><div class="sc-svc-detail">db.r6g.large · 50GB</div></div></div>
-            <div class="sc-svc-formula">$0.320×720×2 + 50×$0.10</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$466</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🪣</span><div><div class="sc-svc-name">S3 Standard</div><div class="sc-svc-detail">100GB</div></div></div>
-            <div class="sc-svc-formula">100×$0.025</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$2.50</div>
-          </div>
-          <div class="sc-divider"></div>
-          <div class="sc-note">💡 <strong>Aurora 仍是最大費用</strong>（77%）。EC2 4 台 8hr/天各含EBS合計 $72，Aurora Primary+Replica $466。NAT 固定費約 $47 不因流量少而減少太多，測試環境若改 db.t3.medium 可大幅降低 DB 成本。</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scenario: 正常營運 -->
-    <div class="scenario-panel" id="sc-normal">
-      <div class="scenario-card">
-        <div class="scenario-header">
-          <div>
-            <div class="scenario-name">☀️ 正常營運情境</div>
-            <div class="scenario-desc">生產環境 · 24hr/天 · 中等流量 · 本架構基準</div>
-          </div>
-          <div class="scenario-total">~$822 / 月</div>
-        </div>
-        <div class="scenario-body">
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🌐</span><div><div class="sc-svc-name">Route 53</div><div class="sc-svc-detail">1 zone · 50萬 queries</div></div></div>
-            <div class="sc-svc-formula">$0.50 + 0.5×$0.40</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$1</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>☁️</span><div><div class="sc-svc-name">CloudFront</div><div class="sc-svc-detail">800GB / 月</div></div></div>
-            <div class="sc-svc-formula">800 × $0.120</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$96</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>⚖️</span><div><div class="sc-svc-name">ALB</div><div class="sc-svc-detail">50萬 req/月</div></div></div>
-            <div class="sc-svc-formula">固定 + LCU</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$17.87</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🛡️</span><div><div class="sc-svc-name">NAT Gateway</div><div class="sc-svc-detail">80GB / 月</div></div></div>
-            <div class="sc-svc-formula">NAT固定費 + 流量費 + 區域NAT</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$50.22</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 WEB × 2</div><div class="sc-svc-detail">24hr/天</div></div></div>
-            <div class="sc-svc-formula">EC2 + EBS gp3 (50GB×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$89.02</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 AP × 2</div><div class="sc-svc-detail">24hr/天</div></div></div>
-            <div class="sc-svc-formula">EC2 + EBS gp3 (50GB×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$89.02</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>💾</span><div><div class="sc-svc-name">EBS gp3 × 4</div><div class="sc-svc-detail">50GB/台</div></div></div>
-            <div class="sc-svc-formula">50×$0.096×4（含於EC2行）</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$19</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🔴</span><div><div class="sc-svc-name">Aurora PostgreSQL</div><div class="sc-svc-detail">db.r6g.large · 120GB</div></div></div>
-            <div class="sc-svc-formula">$0.320×720×2 + 120×$0.10</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$472.01</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🪣</span><div><div class="sc-svc-name">S3 Standard</div><div class="sc-svc-detail">300GB</div></div></div>
-            <div class="sc-svc-formula">300×$0.025</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$7.50</div>
-          </div>
-          <div class="sc-divider"></div>
-          <div class="sc-note">📊 <strong>費用分佈（CSV實際）：</strong>Aurora $472（57%）· EC2×4 $178（22%）· CloudFront $96（12%）· NAT $50（6%）<br>數字與 AWS Pricing Calculator 匯出完全一致，合計 $822.34。</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scenario: 業務高峰 -->
-    <div class="scenario-panel" id="sc-peak">
-      <div class="scenario-card">
-        <div class="scenario-header">
-          <div>
-            <div class="scenario-name">🔥 業務高峰情境</div>
-            <div class="scenario-desc">月底對帳 / 發薪日 · 24hr 全天 · 大流量</div>
-          </div>
-          <div class="scenario-total">~$1,158 / 月</div>
-        </div>
-        <div class="scenario-body">
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🌐</span><div><div class="sc-svc-name">Route 53</div><div class="sc-svc-detail">1 zone · 200萬 queries</div></div></div>
-            <div class="sc-svc-formula">$0.50 + 2×$0.40</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$1</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>☁️</span><div><div class="sc-svc-name">CloudFront</div><div class="sc-svc-detail">3TB / 月</div></div></div>
-            <div class="sc-svc-formula">3000 × $0.120</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$360</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>⚖️</span><div><div class="sc-svc-name">ALB</div><div class="sc-svc-detail">500萬 req/月</div></div></div>
-            <div class="sc-svc-formula">固定 + 高LCU</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$48</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🛡️</span><div><div class="sc-svc-name">NAT Gateway</div><div class="sc-svc-detail">300GB / 月</div></div></div>
-            <div class="sc-svc-formula">NAT固定費 + 300GB + 區域NAT</div>
-            <div class="sc-svc-cost" style="color:var(--accent)">$60</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 WEB × 2</div><div class="sc-svc-detail">24hr/天 · 全天運行</div></div></div>
-            <div class="sc-svc-formula">EC2+EBS (24hr×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$89.02</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🖥️</span><div><div class="sc-svc-name">EC2 AP × 2</div><div class="sc-svc-detail">24hr/天 · 全天運行</div></div></div>
-            <div class="sc-svc-formula">EC2+EBS (24hr×2台)</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$89.02</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>💾</span><div><div class="sc-svc-name">EBS gp3 × 4</div><div class="sc-svc-detail">50GB/台</div></div></div>
-            <div class="sc-svc-formula">50×$0.096×4（含於EC2行）</div>
-            <div class="sc-svc-cost" style="color:var(--blue)">$19</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🔴</span><div><div class="sc-svc-name">Aurora PostgreSQL</div><div class="sc-svc-detail">db.r6g.large · 200GB · 高I/O</div></div></div>
-            <div class="sc-svc-formula">$0.320×720×2 + 200×$0.10 + I/O</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$482</div>
-          </div>
-          <div class="sc-svc-row">
-            <div class="sc-svc-left"><span>🪣</span><div><div class="sc-svc-name">S3 Standard</div><div class="sc-svc-detail">500GB</div></div></div>
-            <div class="sc-svc-formula">500×$0.025</div>
-            <div class="sc-svc-cost" style="color:var(--red)">$12.50</div>
-          </div>
-          <div class="sc-divider"></div>
-          <div class="sc-note">🔥 <strong>高峰情境 CloudFront 費用暴增到 $360</strong>（32%）。EC2 4 台全天各含EBS合計 $178，佔 16%。CloudFront 快取最佳化可減少 30–50% 流量費。</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div><!-- /tab-howto -->
-
-</div><!-- /page -->
-
-
-<script src="tub_app.js"></script>
-</body>
-</html>
+      <script src="tub_app.js"></script>
+    </body>
+  </html>

@@ -14,6 +14,17 @@ function revealTotal(){
     btn.classList.add('revealed');
   }
 }
+function openArchModal(){
+  var modal=document.getElementById('arch-modal');
+  modal.classList.add('open');
+}
+function closeArchModal(event){
+  if(event){
+    event.stopPropagation();
+  }
+  var modal=document.getElementById('arch-modal');
+  modal.classList.remove('open');
+}
 function toggleAnswer(id){
   var ans=document.getElementById(id+'-ans');
   var btn=document.querySelector('#'+id+' .quiz-toggle');
