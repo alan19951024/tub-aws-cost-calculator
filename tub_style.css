@@ -213,9 +213,11 @@ h1 span {
   border-radius: 8px;
   border: 1px solid var(--border2);
   margin: 0 auto;
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
 }
 .arch-wrap img:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 .arch-caption {
   margin-top: 14px;
