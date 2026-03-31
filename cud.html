@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 GCP CUD Strategy - Advanced Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. THE SETUP */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #f1f3f4; display: grid; gap: 40px; grid-template-columns: 1fr; padding: 40px 0; }
+        
+        .slide-container {
+            width: 1280px; height: 720px;
+            background-color: #ffffff;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #3c4043;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 60px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+
+        /* GCP LOGO COLORS */
+        :root {
+            --g-blue: #4285f4;
+            --g-red: #ea4335;
+            --g-yellow: #fbbc04;
+            --g-green: #34a853;
+            --g-grey: #5f6368;
+            --g-light-blue: rgba(66, 133, 244, 0.1);
+        }
+
+        .slide-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .slide-title::before { content: ''; width: 8px; height: 36px; background: var(--g-blue); border-radius: 4px; }
+
+        .content-area { flex-grow: 1; position: relative; z-index: 2; }
+
+        /* TITLE SLIDE */
+        .title-layout { text-align: left; justify-content: center; display: flex; flex-direction: column; height: 100%; }
+        .title-layout h1 { font-size: 56px; color: var(--g-blue); line-height: 1.2; margin-bottom: 10px; }
+        .title-layout .subtitle { font-size: 28px; color: var(--g-grey); margin-bottom: 40px; }
+        .title-brand { display: flex; gap: 10px; margin-bottom: 20px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* DATA VISUALIZATION COMPONENTS */
+        .donut-container { display: flex; align-items: center; gap: 40px; }
+        .donut { 
+            width: 220px; height: 220px; border-radius: 50%;
+            background: conic-gradient(var(--g-green) 0% 85%, #e8eaed 85% 100%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .donut::after {
+            content: '85%';
+            width: 160px; height: 160px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: 700; color: var(--g-green);
+        }
+
+        .area-chart { width: 100%; height: 250px; position: relative; border-bottom: 2px solid #e8eaed; border-left: 2px solid #e8eaed; margin-top: 20px; }
+        .area-fill { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, var(--g-light-blue), transparent);
+            clip-path: polygon(0% 80%, 20% 75%, 40% 70%, 60% 40%, 80% 20%, 100% 10%, 100% 100%, 0% 100%);
+        }
+        .area-line {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            clip-path: polygon(0% 80%, 20% 75%, 40% 70%, 60% 40%, 80% 20%, 100% 10%, 100% 11%, 0% 81%);
+            background-color: var(--g-blue);
+        }
+
+        .strategy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .s-card { background: #fff; border: 1px solid #e8eaed; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .s-card.highlight { border-top: 5px solid var(--g-blue); }
+        .s-card .price { font-size: 28px; font-weight: 700; color: var(--g-green); margin: 10px 0; }
+        .s-card .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .tag-blue { background: #e8f0fe; color: #1967d2; }
+        .tag-green { background: #e6f4ea; color: #1e8e3e; }
+
+        /* ANALYSIS COMPONENTS */
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .comparison-table th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 16px; border-bottom: 2px solid #e8eaed; }
+        .comparison-table td { padding: 15px; border-bottom: 1px solid #e8eaed; font-size: 15px; }
+
+        .risk-matrix { display: flex; gap: 20px; margin-top: 20px; }
+        .risk-item { flex: 1; padding: 20px; border-radius: 12px; position: relative; }
+        .risk-low { background: #e6f4ea; color: #1e8e3e; }
+        .risk-med { background: #fff4e5; color: #d56e0c; }
+        .risk-high { background: #fce8e6; color: #c5221f; }
+
+        .analysis-box { background: #f8f9fa; border-radius: 12px; padding: 25px; border-left: 6px solid var(--g-yellow); }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .stat-item { padding: 15px; border-left: 4px solid var(--g-blue); background: #f8f9fa; }
+        .stat-val { font-size: 28px; font-weight: 700; color: var(--g-blue); }
+
+    </style>
+</head>
+<body>
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide-container">
+        <div class="content-area title-layout">
+            <div class="title-brand">
+                <div class="dot" style="background:var(--g-blue)"></div>
+                <div class="dot" style="background:var(--g-red)"></div>
+                <div class="dot" style="background:var(--g-yellow)"></div>
+                <div class="dot" style="background:var(--g-green)"></div>
+            </div>
+            <h1>2026 年度 GCP <br>承諾使用折扣 (CUD) 採購策略</h1>
+            <p class="subtitle">回顧 2025 效益，佈局 2026 雲端資源與成本優化</p>
+            <div style="margin-top: 40px; font-size: 18px; color: var(--g-grey);">
+                <p><strong>報告人：</strong> [您的姓名]</p>
+                <p><strong>日期：</strong> 2026/03/25</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: 2025 Review -->
+    <div class="slide-container">
+        <h2 class="slide-title">2025 年度 CUD 執行效益分析</h2>
+        <div class="content-area">
+            <div class="donut-container">
+                <div class="donut"></div>
+                <div style="flex:1">
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-val">TWD 660萬+</div>
+                            <div class="stat-label">全年累計節省金額</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-val">85%</div>
+                            <div class="stat-label">核心資源覆蓋率</div>
+                        </div>
+                    </div>
+                    <div class="analysis-box" style="margin-top:25px;">
+                        <h3>財務影響分析</h3>
+                        <p style="margin-top:10px; font-size:16px; color:var(--g-grey);">
+                            透過 CUD 的鎖定，我們成功將<strong>單位計算成本下降了 42%</strong>。相較於隨需應變 (On-demand) 模式，CUD 提供了極高的可預測性，使我們在面對 2025 年多變的業務流量時，預算支出偏差始終維持在 <strong>±5%</strong> 以內。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: Why CUD in 2026? (Deep Dive) -->
+    <div class="slide-container">
+        <h2 class="slide-title">2026 採購必要性深度分析</h2>
+        <div class="content-area">
+            <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:40px;">
+                <div>
+                    <h3>成本對比：On-demand vs. CUD</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>計費模式</th>
+                                <th>預估年支出 (TWD)</th>
+                                <th>靈活性</th>
+                                <th>主要風險</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>隨需應變 (On-demand)</strong></td>
+                                <td>~ TWD 2,200 萬</td>
+                                <td style="color:var(--g-green)">極高 (隨開隨關)</td>
+                                <td style="color:var(--g-red)">預算超支風險、無折扣</td>
+                            </tr>
+                            <tr>
+                                <td><strong>1 年期 CUD (建議)</strong></td>
+                                <td>~ TWD 1,600 萬</td>
+                                <td>中 (按年承諾)</td>
+                                <td>短期資源閒置風險</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3 年期 CUD (核心)</strong></td>
+                                <td>~ TWD 1,350 萬</td>
+                                <td style="color:var(--g-red)">低 (長期鎖定)</td>
+                                <td>技術轉型過慢風險</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="analysis-box" style="border-left-color:var(--g-blue);">
+                    <h3 style="color:var(--g-blue)">財務邊際收益</h3>
+                    <p style="margin-top:15px; font-size:15px;">
+                        針對「專案 X」的 35% 需求增長，若完全不採購 CUD，將導致<strong>現金流壓力增加 TWD 400 萬</strong>。
+                    </p>
+                    <div style="margin-top:20px; padding:15px; background:white; border-radius:8px; border:1px solid #e8eaed;">
+                        <span style="font-weight:700">損益平衡點分析：</span><br>
+                        只要資源使用率維持在 <strong>58%</strong> 以上，1 年期 CUD 即具備獲利正向效益。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: Risk & Commitment Strategy -->
+    <div class="slide-container">
+        <h2 class="slide-title">承諾期限組合與風險控管</h2>
+        <div class="content-area">
+            <p style="margin-bottom:20px; color:var(--g-grey);">我們採取「三層級」採購模型，以平衡折扣極大化與技術靈活性：</p>
+            <div class="risk-matrix">
+                <div class="risk-item risk-low">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <strong style="display:block; margin:10px 0;">穩定核心 (Tier 1)</strong>
+                    <p style="font-size:14px"><strong>3 年期 CUD</strong><br>適用於資料庫與常駐型 Web 伺服器。目標：折扣極大化 (55%)。</p>
+                </div>
+                <div class="risk-item risk-med">
+                    <i class="fa-solid fa-arrows-spin"></i>
+                    <strong style="display:block; margin:10px 0;">增長過渡 (Tier 2)</strong>
+                    <p style="font-size:14px"><strong>1 年期 CUD</strong><br>適用於新一代 C3 系列機型轉型期。目標：技術迭代靈活性。</p>
+                </div>
+                <div class="risk-item risk-high">
+                    <i class="fa-solid fa-wind"></i>
+                    <strong style="display:block; margin:10px 0;">突發爆發 (Tier 3)</strong>
+                    <p style="font-size:14px"><strong>On-demand / Preemptible</strong><br>適用於「專案 X」上線初期的壓力測試。目標：純彈性。</p>
+                </div>
+            </div>
+            <div class="analysis-box" style="margin-top:30px; border-left-color:var(--g-green);">
+                <h3 style="color:var(--g-green)">動態採購邏輯 (Dynamic Purchase)</h3>
+                <p style="margin-top:10px; font-size:16px;">
+                    我們會利用 GCP 提供的「可交換性 (Flexible CUD)」特性，優先採購基於費用的承諾，這允許我們在 2026 年底根據實際轉型速度，將承諾資源在 N2 與 C3 系列之間自由挪移，從而<strong>消弭技術轉型的套牢風險</strong>。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: 2026 Detailed Plan -->
+    <div class="slide-container">
+        <h2 class="slide-title">2026 年度 建議採購清單與效益預估</h2>
+        <div class="content-area">
+            <div class="strategy-grid">
+                <div class="s-card highlight">
+                    <div class="tag tag-blue">Core Compute</div>
+                    <h3>N2 / N2D</h3>
+                    <div class="price">55% OFF</div>
+                    <p style="font-size:14px;"><strong>策略：</strong> 3 年期<br>對應現有穩定負載</p>
+                </div>
+                <div class="s-card highlight">
+                    <div class="tag tag-blue">Next-Gen</div>
+                    <h3>C3 系列</h3>
+                    <div class="price">37% OFF</div>
+                    <p style="font-size:14px;"><strong>策略：</strong> 1 年期<br>對應「專案 X」新需求</p>
+                </div>
+                <div class="s-card">
+                    <div class="tag tag-green">Cloud SQL</div>
+                    <h3>Managed DB</h3>
+                    <div class="price">25% OFF</div>
+                    <p style="font-size:14px;"><strong>策略：</strong> 1 年期<br>降低 24/7 資料庫成本</p>
+                </div>
+                <div class="s-card">
+                    <div class="tag tag-green">BigQuery</div>
+                    <h3>Data Analytics</h3>
+                    <div class="price">15% OFF</div>
+                    <p style="font-size:14px;"><strong>策略：</strong> 1 年期<br>控制大型分析任務成本</p>
+                </div>
+            </div>
+            
+            <div style="margin-top:40px; display:flex; gap:30px;">
+                <div style="flex:1; background:#f8f9fa; padding:20px; border-radius:12px;">
+                    <h3><i class="fa-solid fa-chart-pie" style="color:var(--g-blue)"></i> 覆蓋率目標：90%</h3>
+                    <p style="font-size:14px; margin-top:5px;">2026 年預計將總資源承諾覆蓋率由 85% 提升至 90%，進一步壓低單位營運成本。</p>
+                </div>
+                <div style="flex:1; background:#f8f9fa; padding:20px; border-radius:12px;">
+                    <h3><i class="fa-solid fa-money-bill-trend-up" style="color:var(--g-green)"></i> 預期總節省：TWD 800萬</h3>
+                    <p style="font-size:14px; margin-top:5px;">透過「長短期限結合」採購策略，預計 2026 全年能實現新台幣 800 萬元的現金節省。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Conclusion -->
+    <div class="slide-container">
+        <h2 class="slide-title">結論與行動建議</h2>
+        <div class="content-area">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; height:100%;">
+                <div>
+                    <h3>核心財務結論</h3>
+                    <p style="margin-top:20px; line-height:1.8;">
+                        CUD 不僅是折扣工具，更是企業<strong>對沖雲端成本波動</strong>的核心手段。考量 2026 年大幅度的資源擴張與技術迭代，透過「穩核心、試新機」的組合承諾，能在獲取最大折扣的同時，保留 40% 的運算彈性。
+                    </p>
+                    <div style="margin-top:40px; text-align:center; padding:30px; border:2px dashed #e8eaed; border-radius:20px; background:#fffcf0;">
+                        <h1 style="color:var(--g-yellow); font-size:48px;">TWD 8,000,000</h1>
+                        <p style="font-weight:700">2026 全年預計減降成本</p>
+                    </div>
+                </div>
+                <div>
+                    <h3>Next Steps & Timeline</h3>
+                    <div class="stat-item" style="margin-bottom:20px;">
+                        <strong>2025 / 12</strong>
+                        <p>完成預算審核與 GCP 合約採購流程。</p>
+                    </div>
+                    <div class="stat-item" style="margin-bottom:20px;">
+                        <strong>2026 / 01</strong>
+                        <p>執行第一階段 (Tier 1 & 2) 承諾購買。</p>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Quarterly</strong>
+                        <p>進行季度節省效益審計與優化建議。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="position:absolute; bottom:40px; right:60px; font-weight:700; color:var(--g-blue); font-size:24px;">
+            謝謝聆聽 | Q&A
+        </div>
+    </div>
+
+</body>
+</html>
