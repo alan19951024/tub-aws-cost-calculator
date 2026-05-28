@@ -222,13 +222,11 @@
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🔀 Application Load Balancer (ALB)</span><span
-                        class="qc-val">依照流量計畫（HTTP 請求
-                        <strong>50 萬次 / 月</strong>，單次請求大小
-                          <strong>32 KB</strong>）</span>
+                        class="qc-val">處理位元組 <strong>16 GB / 月</strong>（50 萬請求 × 32 KB），每秒新連線數/請求數 <strong>1</strong>，規則 <strong>10</strong>（前 10 條免費），處理時間 <strong>0.05 秒</strong></span>
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🛡️ NAT Gateway</span><span
-                        class="qc-val">出站流量 <strong>80 GB</strong></span>
+                        class="qc-val">出站流量 <strong>80 GB</strong>，含區域 NAT 閘道（必填，資料處理填 <strong>0 GB</strong>，仍產生固定時數費）</span>
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🖥️ EC2 WEB Tier × 2</span><span
@@ -403,10 +401,11 @@
                           KB) / month </strong>，單位選「<strong>GB
                           每個月</strong>」<br />
                         • Number of rules:
-                        <strong>10</strong>（預設值即可）<br />
-                        • New connections per second: <strong>1</strong><br />
-                        • Avg processing time:
-                        <strong>1 ms</strong>（預設）<br />
+                        <strong>10</strong>（前 10 條免費，不會產生 LCU 費用）<br />
+                        • New connections per second:
+                        <strong>1</strong>（500,000/月 ÷ 2,592,000 秒 ≈ 0.19，進位）<br />
+                        • Avg request processing time:
+                        <strong>0.05 秒</strong>（50 ms，銀行應用常見值）<br />
                         • ⚠️ 「每個 ALB 每秒的平均請求數量」填
                         <strong>1</strong>，不要填 500,000（那是每月總量）
                       </div>
@@ -428,9 +427,10 @@
                         &nbsp;&nbsp;– Number of Availability Zone:
                         <strong>1</strong><br />
                         &nbsp;&nbsp;– Data processed per Regional NAT Gateway:
-                        <strong>0 GB</strong>（流量填0，僅產生固定費）<br />
-                        • ⚠️ 「區域 NAT 閘道」為必填，流量填
-                        <strong>0 GB</strong> 即可，費用不會增加
+                        <strong>0 GB</strong>（流量填 0，避免額外資料處理費）<br />
+                        • ⚠️ 「區域 NAT 閘道」為必填，資料處理填
+                        <strong>0 GB</strong> 不會產生「資料處理費」，但其固定時數費（約
+                        <strong>$14.22 / 月</strong>）仍會計入總費用
                       </div>
                     </div>
                   </div>
@@ -1131,7 +1131,7 @@
                           <div class="sc-svc-detail">db.r6g.large · 50GB</div>
                         </div>
                       </div>
-                      <div class="sc-svc-formula">$0.320×720×2 + 50×$0.10</div>
+                      <div class="sc-svc-formula">$0.3195×720×2 + 50×$0.10</div>
                       <div class="sc-svc-cost" style="color: var(--red)">
                         $466
                       </div>
@@ -1418,7 +1418,7 @@
                         </div>
                       </div>
                       <div class="sc-svc-formula">
-                        $0.320×720×2 + 200×$0.10 + I/O
+                        $0.3195×720×2 + 200×$0.10 + I/O
                       </div>
                       <div class="sc-svc-cost" style="color: var(--red)">
                         $482
