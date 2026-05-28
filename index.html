@@ -219,13 +219,13 @@
                     <div class="qc-row">
                       <span class="qc-svc">☁️ CloudFront</span><span
                         class="qc-val">流量 <strong>800 GB(Asia
-                          Pacific)</strong></span>
+                          Pacific)</strong>，依用量計費</span>
                     </div>
                     <div class="qc-row">
-                      <span class="qc-svc">🔀 ALB</span><span
-                        class="qc-val">HTTP 請求
-                        <strong>50 萬次 / 月</strong>，單次請求大小<strong>
-                          32 KB</strong></span>
+                      <span class="qc-svc">🔀 Application Load Balancer (ALB)</span><span
+                        class="qc-val">依照流量計畫（HTTP 請求
+                        <strong>50 萬次 / 月</strong>，單次請求大小
+                          <strong>32 KB</strong>）</span>
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🛡️ NAT Gateway</span><span
@@ -249,8 +249,7 @@
                     <div class="qc-row">
                       <span class="qc-svc">🛢️ Aurora PostgreSQL </span><span
                         class="qc-val"><strong>db.r6g.large </strong>( Primary +
-                        Replica )，
-                        儲存 <strong>120 GB</strong></span>
+                        Replica )，儲存 <strong>120 GB</strong>，CloudWatch Database Insights 否，RDS 代理 否</span>
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🪣 S3 Standard</span><span
@@ -302,7 +301,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 9</div>
+                    <div class="cs-num">STEP 3</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 EC2 WEB Tier × 2</div>
                       <div class="cs-body">
@@ -318,7 +317,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 10</div>
+                    <div class="cs-num">STEP 4</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 EC2 AP Tier × 2</div>
                       <div class="cs-body">
@@ -338,7 +337,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 3</div>
+                    <div class="cs-num">STEP 5</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 Amazon Aurora PostgreSQL</div>
                       <div class="cs-body">
@@ -359,7 +358,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 4</div>
+                    <div class="cs-num">STEP 6</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 Amazon S3</div>
                       <div class="cs-body">
@@ -372,7 +371,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 5</div>
+                    <div class="cs-num">STEP 7</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 Amazon CloudFront</div>
                       <div class="cs-body">
@@ -386,7 +385,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 6</div>
+                    <div class="cs-num">STEP 8</div>
                     <div class="cs-content">
                       <div class="cs-title">
                         新增 Elastic Load Balancing（ALB）
@@ -414,7 +413,7 @@
                   </div>
 
                   <div class="calc-step">
-                    <div class="cs-num">STEP 7</div>
+                    <div class="cs-num">STEP 9</div>
                     <div class="cs-content">
                       <div class="cs-title">新增 NAT Gateway（VPC）</div>
                       <div class="cs-body">
@@ -436,7 +435,7 @@
                   </div>
 
                   <div class="calc-step cs-last">
-                    <div class="cs-num">STEP 8</div>
+                    <div class="cs-num">STEP 10</div>
                     <div class="cs-content">
                       <div class="cs-title">檢視 Summary 並截圖</div>
                       <div class="cs-body">
@@ -519,7 +518,7 @@
                     <td style="color: var(--accent)">$96</td>
                   </tr>
                   <tr>
-                    <td>Application Load Balancer</td>
+                    <td>Application Load Balancer (ALB)</td>
                     <td><span class="tag tag-w">WEB</span></td>
                     <td style="font-size: 12px; color: var(--muted)">
                       固定費（$0.008 × 720hr）+ LCU費（Processed bytes 16 GB /
@@ -537,7 +536,7 @@
                   </tr>
                   <tr>
                     <td>EC2 t3.medium × 2（WEB Tier）</td>
-                    <td><span class="tag tag-a">AP</span></td>
+                    <td><span class="tag tag-w">WEB</span></td>
                     <td style="font-size: 12px; color: var(--muted)">
                       t3.medium單價 × 720hr × 2台 + EBS（50GB × 單價 × 2台）
                     </td>
@@ -746,7 +745,7 @@
                   <div class="pc-header">
                     <div class="pc-icon">🔀</div>
                     <div>
-                      <div class="pc-title">Application Load Balancer</div>
+                      <div class="pc-title">Application Load Balancer (ALB)</div>
                       <div class="pc-subtitle">Compute · LCU 計費</div>
                     </div>
                   </div>
@@ -835,9 +834,9 @@
                     <div class="formula-box">
                       架構共 4 台 EC2（WEB Tier×2 + AP Tier×2）<br />
                       月費 = EC2費 + EBS費（合併計費）<br />
-                      WEB×2：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 =
+                      WEB×2：EC2 $0.0552×720×2 + EBS 50GB×$0.096×2 ≈
                       <strong>$89.02</strong><br />
-                      AP×2 ：EC2 $0.0544×720×2 + EBS 50GB×$0.096×2 =
+                      AP×2 ：EC2 $0.0552×720×2 + EBS 50GB×$0.096×2 ≈
                       <strong>$89.02</strong><br />
                       <span class="f-comment"># EC2+EBS 合計 $178.04（含儲存，與 Pricing
                         Calculator
@@ -879,7 +878,7 @@
                   </div>
                   <div class="pc-body">
                     <div class="formula-box">
-                      月費 = 容量(GB) × $0.08/GB × 台數<br />
+                      月費 = 容量(GB) × $0.096/GB × 台數<br />
                       架構共 4 台 EC2，掛載 EBS 各 50GB<br />
                       = 已含於各 EC2 費用中（50GB × $0.096/台，2台/Tier）<br />
                       <span class="f-comment"># EC2 停機不省 EBS 費！</span>
@@ -921,12 +920,12 @@
                   <div class="pc-body">
                     <div class="formula-box">
                       月費 = 實例費 + 儲存費 + I/O費<br />
-                      實例 = $0.320/hr × 720hr × 2台 = $460.8<br />
+                      實例 = $0.3195/hr × 720hr × 2台 ≈ $460.01<br />
                       儲存 = 120GB × $0.10/GB = $12<br />
                       <span class="f-comment"># AWS 實際費率
-                        $0.320/hr（CSV反推），Primary + Replica
+                        $0.3195/hr Primary + Replica
                         各自計費</span><br />
-                      合計 <strong>$472.01（CSV 完全一致）</strong>
+                      合計 <strong>$472.01</strong>
                     </div>
                     <div class="pc-row">
                       <div class="pc-row-icon">⚠️</div>
@@ -1268,7 +1267,7 @@
                           <div class="sc-svc-detail">db.r6g.large · 120GB</div>
                         </div>
                       </div>
-                      <div class="sc-svc-formula">$0.320×720×2 + 120×$0.10</div>
+                      <div class="sc-svc-formula">$0.3195×720×2 + 120×$0.10</div>
                       <div class="sc-svc-cost" style="color: var(--red)">
                         $472.01
                       </div>
@@ -1305,7 +1304,7 @@
                         月底對帳 / 發薪日 · 24hr 全天 · 大流量
                       </div>
                     </div>
-                    <div class="scenario-total">~$$1,142 / 月</div>
+                    <div class="scenario-total">~$1,142 / 月</div>
                   </div>
                   <div class="scenario-body">
                     <div class="sc-svc-row">
