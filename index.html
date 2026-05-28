@@ -33,7 +33,7 @@
               user-select: none;
               transition: filter 0.4s ease;
             ">
-            $822
+            $837
           </div>
           <div class="total-sub">
             USD / month · On-Demand · 東京(ap-northeast-1)
@@ -218,8 +218,7 @@
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">☁️ CloudFront</span><span
-                        class="qc-val">流量 <strong>800 GB(Asia
-                          Pacific)</strong>，依用量計費</span>
+                        class="qc-val">資料傳出至網際網路 <strong>800 GB(Asia Pacific)</strong>，資料傳出至原始伺服器 <strong>240 GB</strong>（快取命中率約 70%），依用量計費</span>
                     </div>
                     <div class="qc-row">
                       <span class="qc-svc">🔀 Application Load Balancer (ALB)</span><span
@@ -378,8 +377,10 @@
                         搜尋 <code>CloudFront</code> → Add to estimate<br />
                         • Data transfer out to internet:
                         <strong>800 GB(10萬人次網頁造訪 X 8MB/次)</strong><br />
+                        • Data transfer to origin:
+                        <strong>240 GB</strong>（快取命中率約 70%，800 × 30%）<br />
                         • Region：選 <strong>亞太地區</strong><br />
-                        • HTTPS requests 可保留預設
+                        • HTTPS Requests：<strong>留空</strong>（預估 400–800 萬，未超過 1,000 萬免費額度）
                       </div>
                     </div>
                   </div>
@@ -451,21 +452,22 @@
                   <div class="ans-label">🧮 手動計算參考</div>
                   <div class="ans-formula">
                     Route 53 ：$0.50 + 0.5×$0.40 = $0.70<br />CloudFront ：800GB
-                    × $0.120/GB（Japan 費率） = $96.00<br />ALB ：固定費 $5.76 +
+                    × $0.120/GB（傳出至網際網路）+ 240GB × $0.060/GB（傳出至原始伺服器）
+                    = $110.40<br />ALB ：固定費 $5.76 +
                     LCU ≈ $17.87<br />NAT Gateway ：$0.045×720 + 80×$0.045 +
                     區域NAT費 = $50.22<br />EC2 WEB × 2 ：$0.0552×720hr×2 + EBS
                     50GB×$0.096×2 = $89.02<br />EC2 AP × 2 ：$0.0552×720hr×2 +
                     EBS 50GB×$0.096×2 = $89.02<br />Aurora PG
                     ：$0.3195×720×2 + 120×$0.10 = $472.01<br />S3 ：300GB ×
                     $0.025 =
-                    $7.50<br />────────────────────────────────────────────────────────<br /><strong>合計約：$822.34
+                    $7.50<br />────────────────────────────────────────────────────────<br /><strong>合計約：$836.74
                       / 月</strong>
                   </div>
                   <div class="ans-note" style="margin-top: 10px">
                     📊 <strong>費用集中在兩個服務</strong>：Aurora PostgreSQL
-                    $472（57%）+ EC2×4 $178（22%）合計佔 79%。NAT Gateway $50
-                    含區域 NAT 閘道固定費，CloudFront $96 採 $0.120/GB Japan
-                    費率。
+                    $472（56%）+ EC2×4 $178（21%）合計佔 77%。NAT Gateway $50
+                    含區域 NAT 閘道固定費，CloudFront $110 含對外流量 800GB×$0.120
+                    與回源 240GB×$0.060。
                   </div>
                 </div>
               </div>
@@ -513,9 +515,9 @@
                     <td>Amazon CloudFront</td>
                     <td><span class="tag tag-w">WEB</span></td>
                     <td style="font-size: 12px; color: var(--muted)">
-                      800 GB × Asia Pacific 單價/GB
+                      對外流量 800 GB × $0.120/GB + 回源流量 240 GB × $0.060/GB
                     </td>
-                    <td style="color: var(--accent)">$96</td>
+                    <td style="color: var(--accent)">$110.40</td>
                   </tr>
                   <tr>
                     <td>Application Load Balancer (ALB)</td>
@@ -571,7 +573,7 @@
                     <td colspan="3">
                       <strong>每月合計（On-Demand · Asia Pacific Tokyo）</strong>
                     </td>
-                    <td>$822.34</td>
+                    <td>$836.74</td>
                   </tr>
                 </tbody>
               </table>
@@ -613,8 +615,8 @@
                 <div class="step-n">02</div>
                 <div class="step-t">新增 Route 53 + CF</div>
                 <div class="step-d">
-                  Route 53 · 1 Hosted Zone · 50萬 queries。CloudFront · 800GB ·
-                  Asia Pacific
+                  Route 53 · 1 Hosted Zone · 50萬 queries。CloudFront · 對外 800GB +
+                  回源 240GB · Asia Pacific
                 </div>
               </div>
               <div class="step">
@@ -711,19 +713,22 @@
                   </div>
                   <div class="pc-body">
                     <div class="formula-box">
-                      月費 = 流量(GB) × $0.120/GB<br />
-                      <span class="f-comment"># 東京(Japan) $0.120/GB（AWS Pricing
-                        Calculator Japan
-                        費率）</span><br />
-                      本題：800GB × $0.120 = <strong>$96</strong>
+                      月費 = 對外流量費 + 回源流量費<br />
+                      對外 = 800GB × $0.120/GB = $96.00<br />
+                      回源 = 240GB × $0.060/GB = $14.40<br />
+                      <span class="f-comment"># 東京(Japan) 費率：對外 $0.120/GB、回源 $0.060/GB<br />
+                        # 回源 240GB = 對外 800GB × 30%（快取命中率 70%）<br />
+                        # HTTPS 請求預估 400–800 萬，落在 1,000 萬免費額度內</span><br />
+                      合計 <strong>$110.40</strong>
                     </div>
                     <div class="pc-row">
                       <div class="pc-row-icon">💡</div>
                       <div>
                         <div class="pc-row-label">計費重點</div>
                         <div class="pc-row-val">
-                          僅計算「傳出流量」(Data Transfer Out)。<br />東京(Japan)
-                          Region $0.120/GB，與台北費率相同，高於美國 $0.085。
+                          兩種流量都要計：<br />
+                          ① <strong>傳出至網際網路</strong>（Edge → 使用者）$0.120/GB<br />
+                          ② <strong>傳出至原始伺服器</strong>（CloudFront → ALB/EC2，快取 MISS 與 POST/PUT）$0.060/GB
                         </div>
                       </div>
                     </div>
@@ -732,8 +737,10 @@
                       <div>
                         <div class="pc-row-label">計算機設定</div>
                         <div class="pc-row-val">
-                          Service: CloudFront → Data transfer out → Asia
-                          Pacific<br />輸入月流量 GB 數即可
+                          Service: CloudFront → Asia Pacific<br />
+                          資料傳出至網際網路：800 GB / 月<br />
+                          資料傳出至原始伺服器：240 GB / 月<br />
+                          HTTPS Requests：留空（免費額度內）
                         </div>
                       </div>
                     </div>
@@ -1020,7 +1027,7 @@
                         非生產環境 · EC2 僅上班時間開機 · 流量極少
                       </div>
                     </div>
-                    <div class="scenario-total">~$608 / 月</div>
+                    <div class="scenario-total">~$610 / 月</div>
                   </div>
                   <div class="scenario-body">
                     <div class="sc-svc-row">
@@ -1041,12 +1048,12 @@
                         <span>☁️</span>
                         <div>
                           <div class="sc-svc-name">CloudFront</div>
-                          <div class="sc-svc-detail">100GB / 月</div>
+                          <div class="sc-svc-detail">對外 100GB + 回源 30GB</div>
                         </div>
                       </div>
-                      <div class="sc-svc-formula">100 × $0.120</div>
+                      <div class="sc-svc-formula">100×$0.120 + 30×$0.060</div>
                       <div class="sc-svc-cost" style="color: var(--accent)">
-                        $12
+                        $14
                       </div>
                     </div>
                     <div class="sc-svc-row">
@@ -1144,7 +1151,7 @@
                     </div>
                     <div class="sc-divider"></div>
                     <div class="sc-note">
-                      💡 <strong>Aurora 仍是最大費用</strong>（77%）。EC2 4 台
+                      💡 <strong>Aurora 仍是最大費用</strong>（76%）。EC2 4 台
                       8hr/天各含EBS合計 $72，Aurora Primary+Replica $466。NAT
                       固定費約 $47 不因流量少而減少太多，測試環境若改 db.t3.medium
                       可大幅降低 DB 成本。
@@ -1163,7 +1170,7 @@
                         生產環境 · 24hr/天 · 中等流量 · 本架構基準
                       </div>
                     </div>
-                    <div class="scenario-total">~$822 / 月</div>
+                    <div class="scenario-total">~$837 / 月</div>
                   </div>
                   <div class="scenario-body">
                     <div class="sc-svc-row">
@@ -1184,12 +1191,12 @@
                         <span>☁️</span>
                         <div>
                           <div class="sc-svc-name">CloudFront</div>
-                          <div class="sc-svc-detail">800GB / 月</div>
+                          <div class="sc-svc-detail">對外 800GB + 回源 240GB</div>
                         </div>
                       </div>
-                      <div class="sc-svc-formula">800 × $0.120</div>
+                      <div class="sc-svc-formula">800×$0.120 + 240×$0.060</div>
                       <div class="sc-svc-cost" style="color: var(--accent)">
-                        $96
+                        $110.40
                       </div>
                     </div>
                     <div class="sc-svc-row">
@@ -1287,8 +1294,8 @@
                     </div>
                     <div class="sc-divider"></div>
                     <div class="sc-note">
-                      📊 <strong>費用分佈：</strong>Aurora $472（57%）· EC2×4
-                      $178（22%）· CloudFront $96（12%）· NAT $50（6%）
+                      📊 <strong>費用分佈：</strong>Aurora $472（56%）· EC2×4
+                      $178（21%）· CloudFront $110（13%）· NAT $50（6%）
                     </div>
                   </div>
                 </div>
@@ -1304,7 +1311,7 @@
                         月底對帳 / 發薪日 · 24hr 全天 · 大流量
                       </div>
                     </div>
-                    <div class="scenario-total">~$1,142 / 月</div>
+                    <div class="scenario-total">~$1,196 / 月</div>
                   </div>
                   <div class="scenario-body">
                     <div class="sc-svc-row">
@@ -1325,12 +1332,12 @@
                         <span>☁️</span>
                         <div>
                           <div class="sc-svc-name">CloudFront</div>
-                          <div class="sc-svc-detail">3TB / 月</div>
+                          <div class="sc-svc-detail">對外 3TB + 回源 900GB</div>
                         </div>
                       </div>
-                      <div class="sc-svc-formula">3000 × $0.120</div>
+                      <div class="sc-svc-formula">3000×$0.120 + 900×$0.060</div>
                       <div class="sc-svc-cost" style="color: var(--accent)">
-                        $360
+                        $414
                       </div>
                     </div>
                     <div class="sc-svc-row">
@@ -1433,9 +1440,9 @@
                     <div class="sc-divider"></div>
                     <div class="sc-note">
                       🔥
-                      <strong>高峰情境 CloudFront 費用暴增到 $360</strong>（32%）。EC2 4
-                      台全天各含EBS合計 $178，佔 16%。CloudFront
-                      快取最佳化可減少 30–50% 流量費。
+                      <strong>高峰情境 CloudFront 費用暴增到 $414</strong>（35%，含對外
+                      3TB $360 + 回源 900GB $54）。EC2 4 台全天各含EBS合計 $178，佔 15%。
+                      CloudFront 快取最佳化（提高命中率）可同時降低對外與回源流量。
                     </div>
                   </div>
                 </div>
